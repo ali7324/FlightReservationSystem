@@ -25,4 +25,21 @@ public class FlightService {
     public Optional<FlightEntity> getFlightById(Long id) {
         return flightRepository.findById(id);
     }
+
+    public FlightEntity addFlight(FlightEntity flight) {
+        return flightRepository.save(flight);
+    }
+
+    public FlightEntity updateFlight(Long id, FlightEntity flight) {
+        if (flightRepository.existsById(id)) {
+            flight.setId(id);
+            return flightRepository.save(flight);
+        } else {
+            return null;
+        }
+    }
+
+    public void deleteFlight(Long id) {
+        flightRepository.deleteById(id);
+    }
 }
