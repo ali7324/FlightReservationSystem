@@ -25,7 +25,7 @@ public class ReservationEntity {
     @JoinColumn(name = "passenger_id", nullable = false)
     private PassengerEntity passenger;
 
-    @Column(name = "reservation_date" ,nullable = false)
+    @Column(name = "reservation_date", nullable = false)
     private LocalDateTime reservationDate;
 
 }

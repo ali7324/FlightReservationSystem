@@ -19,22 +19,22 @@ public class FlightEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "flight_number" ,nullable = false)
+    @Column(name = "flight_number", nullable = false)
     private String flightNumber;
 
-    @Column(name = "departure" ,nullable = false)
+    @Column(name = "departure", nullable = false)
     private String departure;
 
-    @Column(name = "destination" ,nullable = false)
+    @Column(name = "destination", nullable = false)
     private String destination;
 
-    @Column(name = "departure_time" ,nullable = false)
+    @Column(name = "departure_time", nullable = false)
     private LocalDateTime departureTime;
 
-    @Column(name = "arrival_time" ,nullable = false)
+    @Column(name = "arrival_time", nullable = false)
     private LocalDateTime arrivalTime;
 
-    @Column(name = "price" ,nullable = false)
+    @Column(name = "price", nullable = false)
     private double price;
 
     @Override

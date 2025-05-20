@@ -2,22 +2,17 @@ package com.example.flightreservationsystem.controller;
 
 import com.example.flightreservationsystem.entity.FlightEntity;
 import com.example.flightreservationsystem.service.FlightService;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import java.util.List;
 
 @RestController
 @RequestMapping("/flight")
+@RequiredArgsConstructor
 public class FlightController {
 
     private final FlightService flightService;
-
-    @Autowired
-    public FlightController (FlightService flightService) {
-        this.flightService = flightService;
-    }
 
     @GetMapping
     public List<FlightEntity> getAllFlights() {

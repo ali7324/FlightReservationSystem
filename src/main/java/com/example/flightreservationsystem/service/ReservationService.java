@@ -2,6 +2,7 @@ package com.example.flightreservationsystem.service;
 
 import com.example.flightreservationsystem.entity.ReservationEntity;
 import com.example.flightreservationsystem.repository.ReservationRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -9,14 +10,10 @@ import java.util.List;
 import java.util.Optional;
 
 @Service
+@RequiredArgsConstructor
 public class ReservationService {
 
     private final ReservationRepository reservationRepository;
-
-    @Autowired
-    public ReservationService(ReservationRepository reservationRepository) {
-        this.reservationRepository = reservationRepository;
-    }
 
     public List<ReservationEntity> getAllReservations() {
         return reservationRepository.findAll();

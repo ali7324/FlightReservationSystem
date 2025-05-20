@@ -2,6 +2,7 @@ package com.example.flightreservationsystem.controller;
 
 import com.example.flightreservationsystem.entity.PassengerEntity;
 import com.example.flightreservationsystem.service.PassengerService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,14 +11,11 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/passengers")
+@RequiredArgsConstructor
 public class PassengerController {
 
     private final PassengerService passengerService;
 
-    @Autowired
-    public PassengerController(PassengerService passengerService) {
-        this.passengerService = passengerService;
-    }
 
     @GetMapping
     public List<PassengerEntity> getAllPassengers() {

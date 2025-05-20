@@ -3,6 +3,7 @@ package com.example.flightreservationsystem.controller;
 import com.example.flightreservationsystem.entity.ReservationEntity;
 import com.example.flightreservationsystem.repository.ReservationRepository;
 import com.example.flightreservationsystem.service.ReservationService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -11,15 +12,10 @@ import java.util.List;
 
 @RestController
 @RequestMapping("/reservations")
+@RequiredArgsConstructor
 public class ReservationController {
 
     private final ReservationService reservationService;
-
-
-    @Autowired
-    public ReservationController(ReservationService reservationService) {
-        this.reservationService = reservationService;
-    }
 
     @GetMapping
     public List<ReservationEntity> getAllReservations() {

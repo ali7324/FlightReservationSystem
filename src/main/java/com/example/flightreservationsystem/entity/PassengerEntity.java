@@ -18,19 +18,19 @@ public class PassengerEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "first_name" ,nullable = false)
+    @Column(name = "first_name", nullable = false)
     private String firstName;
 
-    @Column(name = "last_name" ,nullable = false)
+    @Column(name = "last_name", nullable = false)
     private String lastName;
 
-    @Column(name = "age" ,nullable = false)
+    @Column(name = "age", nullable = false)
     private int age;
 
-    @Column(name = "gender" ,nullable = false)
+    @Column(name = "gender", nullable = false)
     private String gender;
 
-    @Column(name = "date_of_birth" ,nullable = false)
+    @Column(name = "date_of_birth", nullable = false)
     private LocalDateTime dateOfBirth;
 
     @Override
