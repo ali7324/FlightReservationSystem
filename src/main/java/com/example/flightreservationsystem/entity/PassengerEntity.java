@@ -33,6 +33,9 @@ public class PassengerEntity {
     @Column(name = "date_of_birth", nullable = false)
     private LocalDateTime dateOfBirth;
 
+    @Column(name = "gmail", nullable = false)
+    private String gmail;
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;
@@ -43,17 +46,5 @@ public class PassengerEntity {
     @Override
     public int hashCode() {
         return Objects.hashCode(id);
-    }
-
-    @Override
-    public String toString() {
-        return "PassengerEntity{" +
-                "id=" + id +
-                ", firstName='" + firstName + '\'' +
-                ", lastName='" + lastName + '\'' +
-                ", age=" + age +
-                ", gender='" + gender + '\'' +
-                ", dateOfBirth='" + dateOfBirth + '\'' +
-                '}';
     }
 }

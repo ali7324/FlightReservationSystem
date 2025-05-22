@@ -2,6 +2,16 @@ server:
   port: 8080
 
 spring:
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: qafarali91@gmail.com
+    password: "aisx fbyi psvu hmfr"
+    properties:
+      mail:
+        auth: true
+        smtp:
+          starttls.enable: true
   datasource:
     url: jdbc:postgresql://localhost:5432/flight_db
     username: postgres
