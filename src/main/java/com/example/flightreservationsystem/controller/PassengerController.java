@@ -1,18 +1,15 @@
 package com.example.flightreservationsystem.controller;
 
-import com.example.flightreservationsystem.dto.request.PassengerRequestDto;
-import com.example.flightreservationsystem.dto.response.PassengerResponseDto;
-import com.example.flightreservationsystem.entity.PassengerEntity;
+import com.example.flightreservationsystem.dto.PassengerDto;
+import com.example.flightreservationsystem.payload.ApiResponse;
 import com.example.flightreservationsystem.service.PassengerService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -20,62 +17,43 @@ import java.util.List;
 @RequiredArgsConstructor
 public class PassengerController {
 
+
     private final PassengerService passengerService;
 
     @GetMapping
-    public List<PassengerResponseDto> getAllPassengers() {
-        log.info("START: GET /passengers cagirildi: butun sernisinler sorgulandi");
-        List<PassengerResponseDto> passengers = passengerService.getAllPassengers();
-        log.info("END: GET /passengers tamamlandı: {} sernisin tapıldı", passengers.size());
-        return passengers;
+    public ResponseEntity<ApiResponse<List<PassengerDto>>> getAllPassengers() {
+        List<PassengerDto> passengers = passengerService.getAllPassengers();
+        return ResponseEntity.ok(ApiResponse.success(passengers));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<PassengerResponseDto> getPassengerById(@PathVariable Long id) {
-        log.info("START: GET /passengers/{} cagirildi", id);
-        ResponseEntity<PassengerResponseDto> response = passengerService.getPassengerById(id)
-                .map(passenger -> {
-                    log.info("ugurla tapıldı: Passenger id={}", id);
-                    log.info("END: GET /passengers/{} tamamlandı", id);
-                    return ResponseEntity.ok(passenger);
-                })
-                .orElseGet(() -> {
-                    log.warn("Passenger id={} tapılmadı", id);
-                    log.info("END: GET /passengers/{} tamamlandı - tapılmadı", id);
-                    return ResponseEntity.notFound().build();
-                });
-        return response;
+    public ResponseEntity<ApiResponse<PassengerDto>> getPassengerById(@PathVariable Long id) {
+        return passengerService.getPassengerById(id)
+                .map(passenger -> ResponseEntity.ok(ApiResponse.success(passenger, "Passenger retrieved successfully")))
+                .orElseGet(() -> ResponseEntity
+                        .status(404)
+                        .body(ApiResponse.error("Passenger not found")));
     }
 
     @PostMapping
-    public PassengerResponseDto addPassenger(@RequestBody PassengerRequestDto requestDto) {
-        log.info("START: POST /passengers cagirildi: Yeni sernisin elave edilir: {}", requestDto);
-        PassengerResponseDto created = passengerService.addPassenger(requestDto);
-        log.info("ugurla elave edildi: Passenger id={}", created.getId());
-        log.info("END: POST /passengers tamamlandı");
-        return created;
+    public ResponseEntity<ApiResponse<PassengerDto>> addPassenger(@RequestBody PassengerDto requestDto) {
+        PassengerDto created = passengerService.createPassenger(requestDto);
+        return ResponseEntity.ok(ApiResponse.success(created, "Passenger created successfully"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PassengerResponseDto> updatePassenger(@PathVariable Long id, @RequestBody PassengerRequestDto requestDto) {
-        log.info("START: PUT /passengers/{} cagirildi: yenilenen melumatlar: {}", id, requestDto);
-        PassengerResponseDto updated = passengerService.updatePassenger(id, requestDto);
+    public ResponseEntity<ApiResponse<PassengerDto>> updatePassenger(@PathVariable Long id, @RequestBody PassengerDto requestDto) {
+        PassengerDto updated = passengerService.updatePassenger(id, requestDto);
         if (updated != null) {
-            log.info("ugurla yenilendi: Passenger id={}", id);
-            log.info("END: PUT /passengers/{} tamamlandı", id);
-            return ResponseEntity.ok(updated);
+            return ResponseEntity.ok(ApiResponse.success(updated, "Passenger updated successfully"));
         } else {
-            log.warn("yenilenme ugursuz oldu: Passenger id={} tapılmadı", id);
-            log.info("END: PUT /passengers/{} tamamlandı - tapılmadı", id);
-            return ResponseEntity.notFound().build();
+            return ResponseEntity.status(404).body(ApiResponse.error("Passenger not found"));
         }
     }
 
     @DeleteMapping("/{id}")
-    public void deletePassenger(@PathVariable Long id) {
-        log.info("START: DELETE /passengers/{} cagirildi: sernisin silinir", id);
+    public ResponseEntity<ApiResponse<Void>> deletePassenger(@PathVariable Long id) {
         passengerService.deletePassenger(id);
-        log.info("ugurla silindi: Passenger id={}", id);
-        log.info("END: DELETE /passengers/{} tamamlandı", id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Passenger deleted successfully"));
     }
 }

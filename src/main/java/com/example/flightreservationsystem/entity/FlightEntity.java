@@ -2,17 +2,18 @@ package com.example.flightreservationsystem.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
+import org.mapstruct.Mapping;
 
 import java.time.LocalDateTime;
 import java.util.Objects;
 
+@Entity
+@Table(name = "flights")
 @Getter
 @Setter
-@AllArgsConstructor
 @NoArgsConstructor
-@Entity
+@AllArgsConstructor
 @Builder
-@Table(name = "flight")
 public class FlightEntity {
 
     @Id
@@ -36,6 +37,10 @@ public class FlightEntity {
 
     @Column(name = "price", nullable = false)
     private double price;
+
+    @OneToOne
+    @JoinColumn(name = "reservation_id")
+    private ReservationEntity reservation;
 
     @Override
     public boolean equals(Object o) {

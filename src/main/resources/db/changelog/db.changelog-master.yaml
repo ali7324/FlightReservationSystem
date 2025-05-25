@@ -1,0 +1,12 @@
+databaseChangeLog:
+  - include:
+      file: changelog-001-passenger-table.yaml
+      relativeToChangelogFile: true
+
+  - include:
+      file: changelog-002-flight-table.yaml
+      relativeToChangelogFile: true
+
+  - include:
+      file: changelog-003-reservation-table.yaml
+      relativeToChangelogFile: true

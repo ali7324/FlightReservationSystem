@@ -36,6 +36,10 @@ public class PassengerEntity {
     @Column(name = "gmail", nullable = false)
     private String gmail;
 
+    @OneToOne
+    @JoinColumn(name = "flight_id")
+    private FlightEntity flight;
+
     @Override
     public boolean equals(Object o) {
         if (o == null || getClass() != o.getClass()) return false;

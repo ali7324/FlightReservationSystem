@@ -1,4 +1,4 @@
-package com.example.flightreservationsystem.dto.request;
+package com.example.flightreservationsystem.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
@@ -10,7 +10,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class ReservationRequestDto {
+public class ReservationDto {
+
+    private Long id;
+
     @NotNull(message = "Flight ID is required")
     private Long flightId;
 
@@ -19,4 +22,9 @@ public class ReservationRequestDto {
 
     @NotNull(message = "Reservation date is required")
     private LocalDateTime reservationDate;
+
+    private FlightDto flight;
+    private PassengerDto passenger;
+
+
 }

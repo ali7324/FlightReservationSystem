@@ -1,16 +1,15 @@
 package com.example.flightreservationsystem.service;
 
 import com.example.flightreservationsystem.Mapper.PassengerMapper;
-import com.example.flightreservationsystem.dto.request.PassengerRequestDto;
-import com.example.flightreservationsystem.dto.response.PassengerResponseDto;
+import com.example.flightreservationsystem.dto.PassengerDto;
 import com.example.flightreservationsystem.entity.PassengerEntity;
 import com.example.flightreservationsystem.repository.PassengerRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -18,62 +17,50 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class PassengerService {
+
     private final PassengerRepository passengerRepository;
     private final PassengerMapper passengerMapper;
 
-    public List<PassengerResponseDto> getAllPassengers() {
-        log.info("START: butun sernisinler sorgulanir");
-        List<PassengerResponseDto> passengers = passengerRepository.findAll().stream()
+    public List<PassengerDto> getAllPassengers() {
+        log.info("Retrieving all passengers");
+        return passengerRepository.findAll().stream()
                 .map(passengerMapper::toDto)
                 .collect(Collectors.toList());
-        log.info("END: {} sernisin tapıldı", passengers.size());
-        return passengers;
     }
 
-    public Optional<PassengerResponseDto> getPassengerById(Long id) {
-        log.info("START: sernisin id ilə axtarılır: id={}", id);
-        Optional<PassengerResponseDto> passenger = passengerRepository.findById(id)
+    public Optional<PassengerDto> getPassengerById(Long id) {
+        log.info("Getting passenger by ID: {}", id);
+        return passengerRepository.findById(id)
                 .map(passengerMapper::toDto);
-        if (passenger.isPresent()) {
-            log.info("sernisin tapıldı: id={}", id);
-        } else {
-            log.warn("sernisin tapılmadı: id={}", id);
-        }
-        log.info("END: id ile axtarilma tamamlandı");
-        return passenger;
     }
 
-    public PassengerResponseDto addPassenger(PassengerRequestDto dto) {
-        log.info("START: yeni sernisin elave edilir: {}", dto);
+    public PassengerDto createPassenger(PassengerDto dto) {
+        log.info("Creating passenger: {} {}", dto.getFirstName(), dto.getLastName());
         PassengerEntity entity = passengerMapper.toEntity(dto);
         PassengerEntity saved = passengerRepository.save(entity);
-        PassengerResponseDto response = passengerMapper.toDto(saved);
-        log.info("sernisin ugurla elave olundu: id={}", response.getId());
-        log.info("END: sernisin elavesi tamamlandı");
-        return response;
+        log.info("Passenger created with ID: {}", saved.getId());
+        return passengerMapper.toDto(saved);
     }
 
-    public PassengerResponseDto updatePassenger(Long id, PassengerRequestDto dto) {
-        log.info("START: sernisin yenilenir: id={}, yeni melumatlar: {}", id, dto);
-        if (passengerRepository.existsById(id)) {
-            PassengerEntity entity = passengerMapper.toEntity(dto);
-            entity.setId(id);
-            PassengerEntity updated = passengerRepository.save(entity);
-            PassengerResponseDto response = passengerMapper.toDto(updated);
-            log.info("sernisin ugurla yenilendi: id={}", id);
-            log.info("END: yenilenme tamamlandı");
-            return response;
-        } else {
-            log.warn("yenilenme ugursuz oldu: sernisin tapılmadı: id={}", id);
-            log.info("END: yenilenme tamamlandı - tapılmadı");
-            return null;
-        }
+    public PassengerDto updatePassenger(Long id, PassengerDto dto) {
+        log.info("Updating passenger with ID: {}", id);
+        PassengerEntity existing = passengerRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Passenger not found with ID: " + id));
+
+        PassengerEntity updated = passengerMapper.toEntity(dto);
+        updated.setId(existing.getId());
+
+        PassengerEntity saved = passengerRepository.save(updated);
+        log.info("Passenger updated: {}", id);
+        return passengerMapper.toDto(saved);
     }
 
     public void deletePassenger(Long id) {
-        log.info("START: sernisin silinir: id={}", id);
+        log.info("Deleting passenger with ID: {}", id);
+        if (!passengerRepository.existsById(id)) {
+            throw new NoSuchElementException("Passenger not found with ID: " + id);
+        }
         passengerRepository.deleteById(id);
-        log.info("sernisin ugurla silindi: id={}", id);
-        log.info("END: silinme tamamlandı");
+        log.info("Passenger deleted: {}", id);
     }
 }

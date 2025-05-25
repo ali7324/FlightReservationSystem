@@ -28,4 +28,6 @@ public class ReservationEntity {
     @Column(name = "reservation_date", nullable = false)
     private LocalDateTime reservationDate;
 
+
+
 }

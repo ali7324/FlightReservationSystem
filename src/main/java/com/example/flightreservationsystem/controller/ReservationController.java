@@ -1,19 +1,15 @@
 package com.example.flightreservationsystem.controller;
 
-import com.example.flightreservationsystem.dto.request.ReservationRequestDto;
-import com.example.flightreservationsystem.dto.response.ReservationResponseDto;
-import com.example.flightreservationsystem.entity.ReservationEntity;
-import com.example.flightreservationsystem.repository.ReservationRepository;
+import com.example.flightreservationsystem.dto.ReservationDto;
+import com.example.flightreservationsystem.payload.ApiResponse;
 import com.example.flightreservationsystem.service.ReservationService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -24,59 +20,40 @@ public class ReservationController {
     private final ReservationService reservationService;
 
     @GetMapping
-    public List<ReservationResponseDto> getAllReservations() {
-        log.info("START: GET /reservasiya cagirildi: butun reservasiyalar sorgulanir");
-        List<ReservationResponseDto> reservations = reservationService.getAllReservations();
-        log.info("END: GET /rezervasiya tamamlandı: {} rezervasiya tapıldı", reservations.size());
-        return reservations;
+    public ResponseEntity<ApiResponse<List<ReservationDto>>> getAllReservations() {
+        List<ReservationDto> reservations = reservationService.getAllReservations();
+        return ResponseEntity.ok(ApiResponse.success(reservations, "All reservations retrieved successfully"));
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<ReservationResponseDto> getReservationById(@PathVariable Long id) {
-        log.info("START: GET /rezervasiya/{} çağırıldı", id);
-        ResponseEntity<ReservationResponseDto> response = reservationService.getReservationById(id)
-                .map(reservation -> {
-                    log.info("Rezervasiya tapıldı: id={}", id);
-                    log.info("END: GET /rezervasiya/{} tamamlandı", id);
-                    return ResponseEntity.ok(reservation);
-                })
-                .orElseGet(() -> {
-                    log.warn("Rezervasiya tapılmadı: id={}", id);
-                    log.info("END: GET /rezervasiya/{} tamamlandı - tapılmadı", id);
-                    return ResponseEntity.notFound().build();
-                });
-        return response;
+    public ResponseEntity<ApiResponse<ReservationDto>> getReservationById(@PathVariable Long id) {
+        Optional<ReservationDto> reservation = reservationService.getReservationById(id);
+        return reservation
+                .map(r -> ResponseEntity.ok(ApiResponse.success(r, "Reservation retrieved successfully")))
+                .orElseGet(() -> ResponseEntity.status(404).body(ApiResponse.error("Reservation not found")));
     }
 
     @PostMapping
-    public ReservationResponseDto addReservation(@RequestBody ReservationRequestDto requestDto) {
-        log.info("START: POST /rezervasiya cagirildi: yeni rezervasiya elave edilir: {}", requestDto);
-        ReservationResponseDto created = reservationService.addReservation(requestDto);
-        log.info("rezervasiya ugurla yenilendi: id={}", created.getId());
-        log.info("END: POST /rezervasiya tamamlandı");
-        return created;
+    public ResponseEntity<ApiResponse<Void>> createReservation(@RequestBody ReservationDto reservationDto) {
+        reservationService.createReservation(reservationDto);
+        return ResponseEntity.ok(ApiResponse.success(null, "Reservation created successfully"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ReservationResponseDto> updateReservation(@PathVariable Long id, @RequestBody ReservationRequestDto requestDto) {
-        log.info("START: PUT /rezervasiya/{} cagirildi: yenilenen melumatlar: {}", id, requestDto);
-        ReservationResponseDto updated = reservationService.updateReservation(id, requestDto);
-        if (updated != null) {
-            log.info("rezervasiya ugurla yenilendi: id={}", id);
-            log.info("END: PUT /rezervasiya/{} tamamlandı", id);
-            return ResponseEntity.ok(updated);
-        } else {
-            log.warn("yenilenme ugursuz oldu: rezervasiya tapılmadı: id={}", id);
-            log.info("END: PUT /rezervasiya/{} tamamlandı - tapılmadı", id);
-            return ResponseEntity.notFound().build();
-        }
+    public ResponseEntity<ApiResponse<ReservationDto>> updateReservation(
+            @PathVariable Long id,
+            @RequestBody ReservationDto reservationDto
+    ) {
+        Optional<ReservationDto> updated = reservationService.updateReservation(id, reservationDto);
+        return updated
+                .map(r -> ResponseEntity.ok(ApiResponse.success(r, "Reservation updated successfully")))
+                .orElseGet(() -> ResponseEntity.status(404).body(ApiResponse.error("Reservation not found")));
     }
 
     @DeleteMapping("/{id}")
-    public void deleteReservation(@PathVariable Long id) {
-        log.info("START: DELETE /rezervasiya/{} cagirildi: Rezervasiya silinir", id);
+    public ResponseEntity<ApiResponse<Void>> deleteReservation(@PathVariable Long id) {
         reservationService.deleteReservation(id);
-        log.info("Rezervasiya ugurla silindi: id={}", id);
-        log.info("END: DELETE /rezervasiya/{} tamamlandı", id);
+        return ResponseEntity.ok(ApiResponse.success(null, "Reservation deleted successfully"));
     }
+
 }

@@ -1,16 +1,15 @@
 package com.example.flightreservationsystem.service;
 
 import com.example.flightreservationsystem.Mapper.FlightMapper;
-import com.example.flightreservationsystem.dto.request.FlightRequestDto;
-import com.example.flightreservationsystem.dto.response.FlightResponseDto;
+import com.example.flightreservationsystem.dto.FlightDto;
 import com.example.flightreservationsystem.entity.FlightEntity;
 import com.example.flightreservationsystem.repository.FlightRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -22,59 +21,45 @@ public class FlightService {
     private final FlightRepository flightRepository;
     private final FlightMapper flightMapper;
 
-    public List<FlightResponseDto> getAllFlights() {
-        log.info("START: butun ucuslar sorgulanir");
-        List<FlightResponseDto> flights = flightRepository.findAll().stream()
+    public List<FlightDto> getAllFlights() {
+        log.info("Retrieving all flights");
+        return flightRepository.findAll().stream()
                 .map(flightMapper::toDto)
                 .collect(Collectors.toList());
-        log.info("END: {} ucus tapıldı", flights.size());
-        return flights;
     }
 
-    public Optional<FlightResponseDto> getFlightById(Long id) {
-        log.info("START: ucus id ilə axtarılır: id={}", id);
-        Optional<FlightResponseDto> flight = flightRepository.findById(id)
-                .map(flightMapper::toDto);
-        if (flight.isPresent()) {
-            log.info("ucus tapıldı: id={}", id);
-        } else {
-            log.warn("ucus tapılmadı: id={}", id);
-        }
-        log.info("END: id ilə axtarılma tamamlandı");
-        return flight;
+    public Optional<FlightDto> getFlightById(Long id) {
+        log.info("Retrieving flight by ID: {}", id);
+        return flightRepository.findById(id).map(flightMapper::toDto);
     }
 
-    public FlightResponseDto addFlight(FlightRequestDto flightRequestDto) {
-        log.info("START: yeni ucus elave edilir: {}", flightRequestDto);
-        FlightEntity flightEntity = flightMapper.toEntity(flightRequestDto);
-        FlightEntity savedEntity = flightRepository.save(flightEntity);
-        FlightResponseDto responseDto = flightMapper.toDto(savedEntity);
-        log.info("ucus ugurla elave olundu: id={}", responseDto.getId());
-        log.info("END: ucus elave edildi");
-        return responseDto;
+    public FlightDto createFlight(FlightDto flightDto) {
+        log.info("Creating flight: {}", flightDto.getFlightNumber());
+        FlightEntity entity = flightMapper.toEntity(flightDto);
+        FlightEntity saved = flightRepository.save(entity);
+        log.info("Flight created successfully with ID: {}", saved.getId());
+        return flightMapper.toDto(saved);
     }
 
-    public FlightResponseDto updateFlight(Long id, FlightRequestDto flightRequestDto) {
-        log.info("START: ucus yenilenir: id={}, yeni melumatlar: {}", id, flightRequestDto);
-        if (flightRepository.existsById(id)) {
-            FlightEntity flightEntity = flightMapper.toEntity(flightRequestDto);
-            flightEntity.setId(id);
-            FlightEntity updatedEntity = flightRepository.save(flightEntity);
-            FlightResponseDto responseDto = flightMapper.toDto(updatedEntity);
-            log.info("ucus ugurla yenilendi: id={}", id);
-            log.info("END: ucus yenilendi ");
-            return responseDto;
-        } else {
-            log.warn("yenilenme ugursuz oldu: ucus tapılmadı: id={}", id);
-            log.info("END: ucus yenilenmesi tamamlandı - tapılmadı");
-            return null;
-        }
+    public FlightDto updateFlight(Long id, FlightDto flightDto) {
+        log.info("Updating flight with ID: {}", id);
+        FlightEntity existing = flightRepository.findById(id)
+                .orElseThrow(() -> new NoSuchElementException("Flight not found with ID: " + id));
+
+        FlightEntity updated = flightMapper.toEntity(flightDto);
+        updated.setId(existing.getId());
+
+        FlightEntity saved = flightRepository.save(updated);
+        log.info("Flight updated successfully: {}", id);
+        return flightMapper.toDto(saved);
     }
 
     public void deleteFlight(Long id) {
-        log.info("START: ucus silinir: id={}", id);
+        log.info("Deleting flight with ID: {}", id);
+        if (!flightRepository.existsById(id)) {
+            throw new NoSuchElementException("Flight not found with ID: " + id);
+        }
         flightRepository.deleteById(id);
-        log.info("Uçuş ugurla silindi: id={}", id);
-        log.info("END: silinme tamamlandı");
+        log.info("Flight deleted: {}", id);
     }
 }

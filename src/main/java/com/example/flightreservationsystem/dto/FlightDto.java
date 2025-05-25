@@ -1,4 +1,4 @@
-package com.example.flightreservationsystem.dto.request;
+package com.example.flightreservationsystem.dto;
 
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -12,7 +12,10 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class FlightRequestDto {
+public class FlightDto {
+
+    private Long id;
+
     @NotBlank(message = "Flight number cannot be blank")
     private String flightNumber;
 
@@ -30,4 +33,6 @@ public class FlightRequestDto {
 
     @Positive(message = "Price must be positive")
     private double price;
+
+
 }

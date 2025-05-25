@@ -1,4 +1,4 @@
-package com.example.flightreservationsystem.dto.request;
+package com.example.flightreservationsystem.dto;
 
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.NotBlank;
@@ -12,7 +12,9 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-public class PassengerRequestDto {
+public class PassengerDto {
+    private Long id;
+
     @NotBlank(message = "First name cannot be blank")
     private String firstName;
 
@@ -30,4 +32,6 @@ public class PassengerRequestDto {
 
     @NotBlank(message = "Gmail cannot be blank")
     private String gmail;
+
+    private FlightDto flight;
 }
