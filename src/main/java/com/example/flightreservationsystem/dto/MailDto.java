@@ -1,18 +1,18 @@
 package com.example.flightreservationsystem.dto;
 
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
 import java.util.Date;
 
 @Data
-@AllArgsConstructor
+@Builder
 @NoArgsConstructor
+@AllArgsConstructor
 public class MailDto {
-    private String from;
     private String to;
     private String subject;
     private String text;
-    private Date sendDate;
 }

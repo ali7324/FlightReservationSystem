@@ -17,32 +17,18 @@ import java.util.Date;
 @Slf4j
 public class MailService {
 
-    private final JavaMailSender javaMailSender;
+    private final JavaMailSender mailSender;
 
-    public void sendSimpleMail(MailDto mailDto) {
-        log.info("Sending simple mail to: {}", mailDto.getTo());
-
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom(mailDto.getFrom());
-        message.setTo(mailDto.getTo());
-        message.setSubject(mailDto.getSubject());
-        message.setText(mailDto.getText());
-        message.setSentDate(new Date());
-
-        javaMailSender.send(message);
-        log.info("Mail sent successfully to: {}", mailDto.getTo());
-    }
+    private static final String DEFAULT_FROM_EMAIL = "qafarali91@gmail.com";
 
     public void sendReservationConfirmationMail(PassengerDto passengerDto, FlightDto flightDto) {
-        SimpleMailMessage message = new SimpleMailMessage();
-        message.setFrom("qafarali91@gmail.com");
-        message.setTo(passengerDto.getGmail());
-        message.setSubject("Ucuş Rezervasiyanız Uğurla Tamamlandı");
+        String fullName = passengerDto.getFirstName() + " " + passengerDto.getLastName();
 
-        String text = String.format(
-                "Salam %s %s,\n\nUçuş rezervasiyanız uğurla tamamlandı.\n\nUçuş Məlumatları:\n- Uçuş nömrəsi: %s\n- Gedəcəyiniz yer: %s\n- Yola düşmə: %s\n- Çatma vaxtı: %s\n- Qiymət: %.2f AZN\n\nUğurlu uçuşlar!",
-                passengerDto.getFirstName(),
-                passengerDto.getLastName(),
+        String body = String.format(
+                "Hörmətli %s,\n\nUçuş rezervasiyanız uğurla tamamlandı.\n\nRezervasiya Məlumatları:\n" +
+                        "- Uçuş nömrəsi: %s\n- Təyinat yeri: %s\n- Yola düşmə vaxtı: %s\n- Çatma vaxtı: %s\n- Qiymət: %.2f AZN\n\n" +
+                        "Sizə xoş və rahat bir uçuş arzulayırıq!\n\nHörmətlə,\nFlight Reservation komandası",
+                fullName,
                 flightDto.getFlightNumber(),
                 flightDto.getDestination(),
                 flightDto.getDepartureTime(),
@@ -50,10 +36,14 @@ public class MailService {
                 flightDto.getPrice()
         );
 
-        message.setText(text);
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom(DEFAULT_FROM_EMAIL);
+        message.setTo(passengerDto.getGmail());
+        message.setSubject("Uçuş rezervasiyanız təsdiqləndi");
+        message.setText(body);
         message.setSentDate(new Date());
 
-        javaMailSender.send(message);
-        log.info("Confirmation email sent to {}", passengerDto.getGmail());
+        mailSender.send(message);
+        log.info("Rezervasiya təsdiqi göndərildi: {}", passengerDto.getGmail());
     }
 }

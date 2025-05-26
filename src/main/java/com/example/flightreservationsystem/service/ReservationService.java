@@ -31,24 +31,22 @@ public class ReservationService {
     }
 
     public Optional<ReservationDto> getReservationById(Long id) {
-        log.info("Getting reservation by ID: {}", id);
+        log.info("Fetching reservation with ID: {}", id);
         return reservationRepository.findById(id)
                 .map(reservationMapper::toDto);
     }
 
     public ReservationDto createReservation(ReservationDto dto) {
-        log.info("Creating new reservation for passenger ID: {}", dto.getPassengerId());
+        log.info("Creating reservation for passenger ID: {}", dto.getPassengerId());
 
         ReservationEntity entity = reservationMapper.toEntity(dto);
         ReservationEntity saved = reservationRepository.save(entity);
 
         try {
-            MailDto mailDto = new MailDto();
-            mailDto.setTo(dto.getPassenger().getGmail());
             mailService.sendReservationConfirmationMail(dto.getPassenger(), dto.getFlight());
-            log.info("Confirmation email sent to {}", mailDto.getTo());
+            log.info("Confirmation email sent to: {}", dto.getPassenger().getGmail());
         } catch (Exception e) {
-            log.warn("Failed to send confirmation email: {}", e.getMessage());
+            log.error("Failed to send confirmation email: {}", e.getMessage());
         }
 
         log.info("Reservation created with ID: {}", saved.getId());
@@ -64,7 +62,7 @@ public class ReservationService {
                     updated.setId(existing.getId());
 
                     ReservationEntity saved = reservationRepository.save(updated);
-                    log.info("Reservation updated: {}", saved.getId());
+                    log.info("Reservation updated with ID: {}", saved.getId());
                     return reservationMapper.toDto(saved);
                 });
     }
@@ -75,7 +73,7 @@ public class ReservationService {
             throw new NoSuchElementException("Reservation not found with ID: " + id);
         }
         reservationRepository.deleteById(id);
-        log.info("Reservation deleted: {}", id);
+        log.info("Reservation deleted with ID: {}", id);
     }
 
 }

@@ -1,6 +1,8 @@
 package com.example.flightreservationsystem.controller;
 
+import com.example.flightreservationsystem.dto.FlightDto;
 import com.example.flightreservationsystem.dto.MailDto;
+import com.example.flightreservationsystem.dto.PassengerDto;
 import com.example.flightreservationsystem.payload.ApiResponse;
 import com.example.flightreservationsystem.service.MailService;
 import lombok.RequiredArgsConstructor;
@@ -14,9 +16,10 @@ public class MailController {
 
     private final MailService mailService;
 
-    @PostMapping
-    public ResponseEntity<ApiResponse<Void>> sendSimpleMail(@RequestBody MailDto mailDto) {
-        mailService.sendSimpleMail(mailDto);
-        return ResponseEntity.ok(ApiResponse.success(null, "Mail sent successfully"));
+    @PostMapping("/send-reservation-confirmation")
+    public ResponseEntity<ApiResponse<Void>> sendTestReservationMail(@RequestBody PassengerDto passengerDto,
+                                                                     @RequestParam FlightDto flightDto) {
+        mailService.sendReservationConfirmationMail(passengerDto, flightDto);
+        return ResponseEntity.ok(ApiResponse.success(null, "Test reservation mail sent successfully"));
     }
 }
