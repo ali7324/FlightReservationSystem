@@ -1,7 +1,6 @@
 package com.example.flightreservationsystem.service;
 
 import com.example.flightreservationsystem.Mapper.ReservationMapper;
-import com.example.flightreservationsystem.dto.MailDto;
 import com.example.flightreservationsystem.dto.ReservationDto;
 import com.example.flightreservationsystem.entity.ReservationEntity;
 import com.example.flightreservationsystem.repository.ReservationRepository;
@@ -75,5 +74,4 @@ public class ReservationService {
         reservationRepository.deleteById(id);
         log.info("Reservation deleted with ID: {}", id);
     }
-
 }

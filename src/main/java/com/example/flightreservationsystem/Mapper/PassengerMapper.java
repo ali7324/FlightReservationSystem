@@ -9,5 +9,6 @@ import org.mapstruct.factory.Mappers;
 public interface PassengerMapper {
 
     PassengerDto toDto(PassengerEntity entity);
+
     PassengerEntity toEntity(PassengerDto dto);
 }

@@ -8,5 +8,6 @@ import org.mapstruct.factory.Mappers;
 @Mapper(componentModel = "spring")
 public interface ReservationMapper {
     ReservationDto toDto(ReservationEntity entity);
+
     ReservationEntity toEntity(ReservationDto dto);
 }
