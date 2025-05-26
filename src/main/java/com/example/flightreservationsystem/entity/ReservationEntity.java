@@ -1,5 +1,6 @@
 package com.example.flightreservationsystem.entity;
 
+import com.example.flightreservationsystem.enums.ReservationStatus;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -27,6 +28,10 @@ public class ReservationEntity {
 
     @Column(name = "reservation_date", nullable = false)
     private LocalDateTime reservationDate;
+
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private ReservationStatus status;
 
 
 }

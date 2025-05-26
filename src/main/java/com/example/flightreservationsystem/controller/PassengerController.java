@@ -3,6 +3,7 @@ package com.example.flightreservationsystem.controller;
 import com.example.flightreservationsystem.dto.PassengerDto;
 import com.example.flightreservationsystem.dto.ApiResponse;
 import com.example.flightreservationsystem.service.PassengerService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -28,13 +29,14 @@ public class PassengerController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<PassengerDto>> addPassenger(@RequestBody PassengerDto requestDto) {
+    public ResponseEntity<ApiResponse<PassengerDto>> addPassenger(@Valid @RequestBody PassengerDto requestDto) {
         PassengerDto created = passengerService.createPassenger(requestDto);
         return ResponseEntity.ok(ApiResponse.success(created, "Passenger created successfully"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<PassengerDto>> updatePassenger(@PathVariable Long id, @RequestBody PassengerDto requestDto) {
+    public ResponseEntity<ApiResponse<PassengerDto>> updatePassenger(@PathVariable Long id,
+                                                                     @Valid @RequestBody PassengerDto requestDto) {
         PassengerDto updated = passengerService.updatePassengerOrThrow(id, requestDto);
         return ResponseEntity.ok(ApiResponse.success(updated, "Passenger updated successfully"));
     }

@@ -9,6 +9,7 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -64,5 +65,10 @@ public class FlightService {
         }
         flightRepository.deleteById(id);
         log.info("Flight deleted with ID: {}", id);
+    }
+
+    public List<FlightDto> searchFlights(String flightNumber, String departure, String destination, LocalDate departureDate) {
+        List<FlightEntity> results = flightRepository.searchFlights(flightNumber, departure, destination, departureDate);
+        return results.stream().map(flightMapper::toDto).toList();
     }
 }

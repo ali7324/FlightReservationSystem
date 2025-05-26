@@ -2,7 +2,9 @@ package com.example.flightreservationsystem.controller;
 
 import com.example.flightreservationsystem.dto.ReservationDto;
 import com.example.flightreservationsystem.dto.ApiResponse;
+import com.example.flightreservationsystem.enums.ReservationStatus;
 import com.example.flightreservationsystem.service.ReservationService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -32,7 +34,7 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ReservationDto>> createReservation(@RequestBody ReservationDto reservationDto) {
+    public ResponseEntity<ApiResponse<ReservationDto>> createReservation(@Valid @RequestBody ReservationDto reservationDto) {
         ReservationDto created = reservationService.createReservation(reservationDto);
         return ResponseEntity.ok(ApiResponse.success(created, "Reservation created successfully"));
     }
@@ -40,7 +42,7 @@ public class ReservationController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ReservationDto>> updateReservation(
             @PathVariable Long id,
-            @RequestBody ReservationDto reservationDto
+            @Valid @RequestBody ReservationDto reservationDto
     ) {
         ReservationDto updated = reservationService.updateReservationOrThrow(id, reservationDto);
         return ResponseEntity.ok(ApiResponse.success(updated, "Reservation updated successfully"));
@@ -50,6 +52,30 @@ public class ReservationController {
     public ResponseEntity<ApiResponse<Void>> deleteReservation(@PathVariable Long id) {
         reservationService.deleteReservation(id);
         return ResponseEntity.ok(ApiResponse.success(null, "Reservation deleted successfully"));
+    }
+
+
+    @PatchMapping("/{id}/status")
+    public ResponseEntity<ApiResponse<ReservationDto>> updateReservationStatus(
+            @PathVariable Long id,
+            @RequestParam ReservationStatus status) {
+
+        ReservationDto updated = reservationService.updateReservationStatus(id, status);
+        return ResponseEntity.ok(ApiResponse.success(updated, "Reservation status updated successfully"));
+    }
+
+    @PatchMapping("/{id}/cancel")
+    public ResponseEntity<ApiResponse<ReservationDto>> cancelReservation(@PathVariable Long id) {
+        ReservationDto cancelled = reservationService.cancelReservation(id);
+        return ResponseEntity.ok(ApiResponse.success(cancelled, "Reservation cancelled successfully"));
+    }
+
+    @GetMapping("/history")
+    public ResponseEntity<ApiResponse<List<ReservationDto>>> getCancelledReservations() {
+        return ResponseEntity.ok(ApiResponse.success(
+                reservationService.getReservationHistory(),
+                "Cancelled reservation history"
+        ));
     }
 
 }

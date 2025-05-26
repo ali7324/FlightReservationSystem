@@ -49,4 +49,27 @@ public class MailService {
             throw new RuntimeException("E-poçt göndərilə bilmədi: " + e.getMessage());
         }
     }
+
+    public void sendReminderEmail(PassengerDto passengerDto, FlightDto flightDto) {
+        String fullName = passengerDto.getFirstName() + " " + passengerDto.getLastName();
+        String body = String.format(
+                "Salam %s,\n\nXatırlatma: sabah (%s) %s nömrəli uçuşunuza hazır olun.\n" +
+                        "Təyinat: %s\nYola düşmə: %s\n\nUğurlu uçuşlar!",
+                fullName,
+                flightDto.getDepartureTime().toLocalDate(),
+                flightDto.getFlightNumber(),
+                flightDto.getDestination(),
+                flightDto.getDepartureTime().toLocalTime()
+        );
+
+        SimpleMailMessage message = new SimpleMailMessage();
+        message.setFrom("qafarali91@gmail.com");
+        message.setTo(passengerDto.getGmail());
+        message.setSubject("Uçuş Xatırlatması");
+        message.setText(body);
+        message.setSentDate(new Date());
+
+        mailSender.send(message);
+        log.info("Reminder email sent to: {}", passengerDto.getGmail());
+    }
 }
