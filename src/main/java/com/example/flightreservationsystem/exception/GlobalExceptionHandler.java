@@ -1,4 +1,4 @@
-package com.example.flightreservationsystem.exceptions;
+package com.example.flightreservationsystem.exception;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;

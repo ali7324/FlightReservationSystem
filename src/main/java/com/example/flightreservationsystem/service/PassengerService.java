@@ -1,6 +1,6 @@
 package com.example.flightreservationsystem.service;
 
-import com.example.flightreservationsystem.Mapper.PassengerMapper;
+import com.example.flightreservationsystem.mapper.PassengerMapper;
 import com.example.flightreservationsystem.dto.PassengerDto;
 import com.example.flightreservationsystem.entity.PassengerEntity;
 import com.example.flightreservationsystem.repository.PassengerRepository;
@@ -22,16 +22,17 @@ public class PassengerService {
     private final PassengerMapper passengerMapper;
 
     public List<PassengerDto> getAllPassengers() {
-        log.info("Retrieving all passengers");
+        log.info("Fetching all passengers");
         return passengerRepository.findAll().stream()
                 .map(passengerMapper::toDto)
                 .collect(Collectors.toList());
     }
 
-    public Optional<PassengerDto> getPassengerById(Long id) {
-        log.info("Getting passenger by ID: {}", id);
+    public PassengerDto getPassengerOrThrow(Long id) {
+        log.info("Fetching passenger with ID: {}", id);
         return passengerRepository.findById(id)
-                .map(passengerMapper::toDto);
+                .map(passengerMapper::toDto)
+                .orElseThrow(() -> new ResourceNotFoundException("Passenger not found with ID: " + id));
     }
 
     public PassengerDto createPassenger(PassengerDto dto) {
@@ -42,25 +43,25 @@ public class PassengerService {
         return passengerMapper.toDto(saved);
     }
 
-    public PassengerDto updatePassenger(Long id, PassengerDto dto) {
+    public PassengerDto updatePassengerOrThrow(Long id, PassengerDto dto) {
         log.info("Updating passenger with ID: {}", id);
         PassengerEntity existing = passengerRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Passenger not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Passenger not found with ID: " + id));
 
         PassengerEntity updated = passengerMapper.toEntity(dto);
         updated.setId(existing.getId());
 
         PassengerEntity saved = passengerRepository.save(updated);
-        log.info("Passenger updated: {}", id);
+        log.info("Passenger updated with ID: {}", saved.getId());
         return passengerMapper.toDto(saved);
     }
 
     public void deletePassenger(Long id) {
         log.info("Deleting passenger with ID: {}", id);
         if (!passengerRepository.existsById(id)) {
-            throw new NoSuchElementException("Passenger not found with ID: " + id);
+            throw new ResourceNotFoundException("Passenger not found with ID: " + id);
         }
         passengerRepository.deleteById(id);
-        log.info("Passenger deleted: {}", id);
+        log.info("Passenger deleted with ID: {}", id);
     }
 }

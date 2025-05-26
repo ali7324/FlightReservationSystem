@@ -1,4 +1,4 @@
-package com.example.flightreservationsystem.Mapper;
+package com.example.flightreservationsystem.mapper;
 
 import com.example.flightreservationsystem.dto.FlightDto;
 import com.example.flightreservationsystem.entity.FlightEntity;

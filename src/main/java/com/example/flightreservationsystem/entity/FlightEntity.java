@@ -2,7 +2,6 @@ package com.example.flightreservationsystem.entity;
 
 import jakarta.persistence.*;
 import lombok.*;
-import org.mapstruct.Mapping;
 
 import java.time.LocalDateTime;
 import java.util.Objects;

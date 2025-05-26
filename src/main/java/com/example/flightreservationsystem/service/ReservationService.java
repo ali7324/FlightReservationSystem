@@ -1,6 +1,6 @@
 package com.example.flightreservationsystem.service;
 
-import com.example.flightreservationsystem.Mapper.ReservationMapper;
+import com.example.flightreservationsystem.mapper.ReservationMapper;
 import com.example.flightreservationsystem.dto.ReservationDto;
 import com.example.flightreservationsystem.entity.ReservationEntity;
 import com.example.flightreservationsystem.repository.ReservationRepository;
@@ -29,10 +29,11 @@ public class ReservationService {
                 .collect(Collectors.toList());
     }
 
-    public Optional<ReservationDto> getReservationById(Long id) {
+    public ReservationDto getReservationOrThrow(Long id) {
         log.info("Fetching reservation with ID: {}", id);
         return reservationRepository.findById(id)
-                .map(reservationMapper::toDto);
+                .map(reservationMapper::toDto)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with ID: " + id));
     }
 
     public ReservationDto createReservation(ReservationDto dto) {
@@ -52,24 +53,24 @@ public class ReservationService {
         return reservationMapper.toDto(saved);
     }
 
-    public Optional<ReservationDto> updateReservation(Long id, ReservationDto dto) {
+    public ReservationDto updateReservationOrThrow(Long id, ReservationDto dto) {
         log.info("Updating reservation with ID: {}", id);
 
-        return reservationRepository.findById(id)
-                .map(existing -> {
-                    ReservationEntity updated = reservationMapper.toEntity(dto);
-                    updated.setId(existing.getId());
+        ReservationEntity existing = reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with ID: " + id));
 
-                    ReservationEntity saved = reservationRepository.save(updated);
-                    log.info("Reservation updated with ID: {}", saved.getId());
-                    return reservationMapper.toDto(saved);
-                });
+        ReservationEntity updated = reservationMapper.toEntity(dto);
+        updated.setId(existing.getId());
+
+        ReservationEntity saved = reservationRepository.save(updated);
+        log.info("Reservation updated with ID: {}", saved.getId());
+        return reservationMapper.toDto(saved);
     }
 
     public void deleteReservation(Long id) {
         log.info("Deleting reservation with ID: {}", id);
         if (!reservationRepository.existsById(id)) {
-            throw new NoSuchElementException("Reservation not found with ID: " + id);
+            throw new ResourceNotFoundException("Reservation not found with ID: " + id);
         }
         reservationRepository.deleteById(id);
         log.info("Reservation deleted with ID: {}", id);

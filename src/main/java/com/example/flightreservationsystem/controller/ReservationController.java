@@ -1,17 +1,15 @@
 package com.example.flightreservationsystem.controller;
 
 import com.example.flightreservationsystem.dto.ReservationDto;
-import com.example.flightreservationsystem.payload.ApiResponse;
+import com.example.flightreservationsystem.dto.ApiResponse;
 import com.example.flightreservationsystem.service.ReservationService;
 import lombok.RequiredArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
 
-@Slf4j
 @RestController
 @RequestMapping("/reservations")
 @RequiredArgsConstructor
@@ -21,22 +19,22 @@ public class ReservationController {
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<ReservationDto>>> getAllReservations() {
-        List<ReservationDto> reservations = reservationService.getAllReservations();
-        return ResponseEntity.ok(ApiResponse.success(reservations, "All reservations retrieved successfully"));
+        return ResponseEntity.ok(ApiResponse.success(
+                reservationService.getAllReservations(),
+                "All reservations retrieved successfully"
+        ));
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<ApiResponse<ReservationDto>> getReservationById(@PathVariable Long id) {
-        Optional<ReservationDto> reservation = reservationService.getReservationById(id);
-        return reservation
-                .map(r -> ResponseEntity.ok(ApiResponse.success(r, "Reservation retrieved successfully")))
-                .orElseGet(() -> ResponseEntity.status(404).body(ApiResponse.error("Reservation not found")));
+        ReservationDto reservation = reservationService.getReservationOrThrow(id);
+        return ResponseEntity.ok(ApiResponse.success(reservation, "Reservation retrieved successfully"));
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<Void>> createReservation(@RequestBody ReservationDto reservationDto) {
-        reservationService.createReservation(reservationDto);
-        return ResponseEntity.ok(ApiResponse.success(null, "Reservation created successfully"));
+    public ResponseEntity<ApiResponse<ReservationDto>> createReservation(@RequestBody ReservationDto reservationDto) {
+        ReservationDto created = reservationService.createReservation(reservationDto);
+        return ResponseEntity.ok(ApiResponse.success(created, "Reservation created successfully"));
     }
 
     @PutMapping("/{id}")
@@ -44,10 +42,8 @@ public class ReservationController {
             @PathVariable Long id,
             @RequestBody ReservationDto reservationDto
     ) {
-        Optional<ReservationDto> updated = reservationService.updateReservation(id, reservationDto);
-        return updated
-                .map(r -> ResponseEntity.ok(ApiResponse.success(r, "Reservation updated successfully")))
-                .orElseGet(() -> ResponseEntity.status(404).body(ApiResponse.error("Reservation not found")));
+        ReservationDto updated = reservationService.updateReservationOrThrow(id, reservationDto);
+        return ResponseEntity.ok(ApiResponse.success(updated, "Reservation updated successfully"));
     }
 
     @DeleteMapping("/{id}")

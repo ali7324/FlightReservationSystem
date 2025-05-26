@@ -1,6 +1,7 @@
 package com.example.flightreservationsystem.service;
 
-import com.example.flightreservationsystem.Mapper.FlightMapper;
+import com.example.flightreservationsystem.exception.ResourceNotFoundException;
+import com.example.flightreservationsystem.mapper.FlightMapper;
 import com.example.flightreservationsystem.dto.FlightDto;
 import com.example.flightreservationsystem.entity.FlightEntity;
 import com.example.flightreservationsystem.repository.FlightRepository;
@@ -22,44 +23,46 @@ public class FlightService {
     private final FlightMapper flightMapper;
 
     public List<FlightDto> getAllFlights() {
-        log.info("Retrieving all flights");
+        log.info("Fetching all flights");
         return flightRepository.findAll().stream()
                 .map(flightMapper::toDto)
                 .collect(Collectors.toList());
     }
 
-    public Optional<FlightDto> getFlightById(Long id) {
-        log.info("Retrieving flight by ID: {}", id);
-        return flightRepository.findById(id).map(flightMapper::toDto);
+    public FlightDto getFlightOrThrow(Long id) {
+        log.info("Fetching flight with ID: {}", id);
+        return flightRepository.findById(id)
+                .map(flightMapper::toDto)
+                .orElseThrow(() -> new ResourceNotFoundException("Flight not found with ID: " + id));
     }
 
     public FlightDto createFlight(FlightDto flightDto) {
-        log.info("Creating flight: {}", flightDto.getFlightNumber());
+        log.info("Creating new flight: {}", flightDto.getFlightNumber());
         FlightEntity entity = flightMapper.toEntity(flightDto);
         FlightEntity saved = flightRepository.save(entity);
-        log.info("Flight created successfully with ID: {}", saved.getId());
+        log.info("Flight created with ID: {}", saved.getId());
         return flightMapper.toDto(saved);
     }
 
-    public FlightDto updateFlight(Long id, FlightDto flightDto) {
+    public FlightDto updateFlightOrThrow(Long id, FlightDto flightDto) {
         log.info("Updating flight with ID: {}", id);
         FlightEntity existing = flightRepository.findById(id)
-                .orElseThrow(() -> new NoSuchElementException("Flight not found with ID: " + id));
+                .orElseThrow(() -> new ResourceNotFoundException("Flight not found with ID: " + id));
 
         FlightEntity updated = flightMapper.toEntity(flightDto);
         updated.setId(existing.getId());
 
         FlightEntity saved = flightRepository.save(updated);
-        log.info("Flight updated successfully: {}", id);
+        log.info("Flight updated successfully with ID: {}", saved.getId());
         return flightMapper.toDto(saved);
     }
 
     public void deleteFlight(Long id) {
         log.info("Deleting flight with ID: {}", id);
         if (!flightRepository.existsById(id)) {
-            throw new NoSuchElementException("Flight not found with ID: " + id);
+            throw new ResourceNotFoundException("Flight not found with ID: " + id);
         }
         flightRepository.deleteById(id);
-        log.info("Flight deleted: {}", id);
+        log.info("Flight deleted with ID: {}", id);
     }
 }

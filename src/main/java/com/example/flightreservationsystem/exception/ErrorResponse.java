@@ -1,4 +1,4 @@
-package com.example.flightreservationsystem.exceptions;
+package com.example.flightreservationsystem.exception;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

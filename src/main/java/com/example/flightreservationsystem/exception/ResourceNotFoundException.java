@@ -1,4 +1,4 @@
-package com.example.flightreservationsystem.exceptions;
+package com.example.flightreservationsystem.exception;
 
 public class ResourceNotFoundException extends RuntimeException {
 

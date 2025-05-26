@@ -1,4 +1,4 @@
-package com.example.flightreservationsystem.payload;
+package com.example.flightreservationsystem.dto;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
