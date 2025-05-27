@@ -33,4 +33,5 @@ public class PaymentDto {
 
     @NotNull(message = "Reservation ID is required")
     private Long reservationId;
+
 }
