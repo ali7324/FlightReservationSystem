@@ -10,9 +10,9 @@ import java.util.List;
 @Repository
 public interface ReservationRepository extends JpaRepository<ReservationEntity, Long> {
 
-    @Query("SELECT r FROM ReservationEntity r " +
-            "WHERE DATE(r.flight.departureTime) = CURRENT_DATE + 1 " +
-            "AND r.status = 'CONFIRMED'")
+    @Query(value = "SELECT * FROM reservation r " +
+            "JOIN flight f ON r.flight_id = f.id " +
+            "WHERE DATE(f.departure_time) = CURRENT_DATE + INTERVAL 1 DAY " +
+            "AND r.status = 'CONFIRMED'", nativeQuery = true)
     List<ReservationEntity> findTomorrowConfirmedReservations();
-
 }

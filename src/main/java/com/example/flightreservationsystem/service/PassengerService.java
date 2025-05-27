@@ -1,5 +1,6 @@
 package com.example.flightreservationsystem.service;
 
+import com.example.flightreservationsystem.exception.ResourceNotFoundException;
 import com.example.flightreservationsystem.mapper.PassengerMapper;
 import com.example.flightreservationsystem.dto.PassengerDto;
 import com.example.flightreservationsystem.entity.PassengerEntity;

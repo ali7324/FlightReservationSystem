@@ -41,4 +41,11 @@ public class ApiResponse<T> {
         response.setData(data);
         return response;
     }
+
+    public ApiResponse(T data, boolean success) {
+        this.success = success;
+        this.data = data;
+        this.message = success ? "Operation successful" : "Operation failed";
+    }
+
 }
