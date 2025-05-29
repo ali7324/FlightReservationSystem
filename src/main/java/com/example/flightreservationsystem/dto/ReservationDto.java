@@ -15,20 +15,10 @@ import java.time.LocalDateTime;
 public class ReservationDto {
 
     private Long id;
-
-    @NotNull(message = "Flight ID is required")
     private Long flightId;
-
-    @NotNull(message = "Passenger ID is required")
     private Long passengerId;
-
-    @NotNull(message = "Reservation date is required")
-    @FutureOrPresent(message = "Reservation date cannot be in the past")
     private LocalDateTime reservationDate;
-
-    @NotNull(message = "Reservation status is required")
     private ReservationStatus status;
-
     private FlightDto flight;
     private PassengerDto passenger;
 
