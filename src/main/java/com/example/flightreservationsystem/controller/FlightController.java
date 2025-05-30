@@ -4,7 +4,6 @@ import com.example.flightreservationsystem.dto.FlightDto;
 import com.example.flightreservationsystem.dto.ApiResponse;
 import com.example.flightreservationsystem.service.FlightService;
 import com.example.flightreservationsystem.validation.FlightValidator;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.ResponseEntity;

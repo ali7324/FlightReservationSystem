@@ -1,7 +1,5 @@
 package com.example.flightreservationsystem.controller;
 
-import com.example.flightreservationsystem.dto.FlightDto;
-import com.example.flightreservationsystem.dto.PassengerDto;
 import com.example.flightreservationsystem.dto.ApiResponse;
 import com.example.flightreservationsystem.dto.request.MailTestRequest;
 import com.example.flightreservationsystem.service.MailService;
