@@ -3,19 +3,17 @@ package com.example.flightreservationsystem.entity;
 
 import com.example.flightreservationsystem.enums.PaymentStatus;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "payments")
-@Data
-@NoArgsConstructor
+@Getter
+@Setter
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
 public class PaymentEntity {
 

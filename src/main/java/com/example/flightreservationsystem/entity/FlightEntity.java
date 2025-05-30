@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Entity
@@ -37,9 +39,9 @@ public class FlightEntity {
     @Column(name = "price", nullable = false)
     private double price;
 
-    @OneToOne
-    @JoinColumn(name = "reservation_id")
-    private ReservationEntity reservation;
+    @OneToMany(mappedBy = "flight", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReservationEntity> reservations = new ArrayList<>();
+
 
     @Override
     public boolean equals(Object o) {

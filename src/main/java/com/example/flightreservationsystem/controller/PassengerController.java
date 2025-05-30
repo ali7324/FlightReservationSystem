@@ -3,7 +3,7 @@ package com.example.flightreservationsystem.controller;
 import com.example.flightreservationsystem.dto.PassengerDto;
 import com.example.flightreservationsystem.dto.ApiResponse;
 import com.example.flightreservationsystem.service.PassengerService;
-import com.example.flightreservationsystem.validation.PassengerValidator;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.Errors;
@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 public class PassengerController {
 
     private final PassengerService passengerService;
-    private final PassengerValidator passengerValidator;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<PassengerDto>>> getAllPassengers() {
@@ -32,33 +31,16 @@ public class PassengerController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<PassengerDto>> addPassenger(@RequestBody PassengerDto requestDto, Errors errors) {
-        passengerValidator.validate(requestDto, errors);
-
-        if (errors.hasErrors()) {
-            String errorMsg = errors.getAllErrors().stream()
-                    .map(e -> e.getDefaultMessage())
-                    .collect(Collectors.joining("; "));
-            return ResponseEntity.badRequest().body(ApiResponse.error(errorMsg));
-        }
-
+    public ResponseEntity<ApiResponse<PassengerDto>> addPassenger(@Valid @RequestBody PassengerDto requestDto) {
         PassengerDto created = passengerService.createPassenger(requestDto);
         return ResponseEntity.ok(ApiResponse.success(created, "Passenger created successfully"));
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<ApiResponse<PassengerDto>> updatePassenger(@PathVariable Long id,
-                                                                     @RequestBody PassengerDto requestDto,
-                                                                     Errors errors) {
-        passengerValidator.validate(requestDto, errors);
-
-        if (errors.hasErrors()) {
-            String errorMsg = errors.getAllErrors().stream()
-                    .map(e -> e.getDefaultMessage())
-                    .collect(Collectors.joining("; "));
-            return ResponseEntity.badRequest().body(ApiResponse.error(errorMsg));
-        }
-
+    public ResponseEntity<ApiResponse<PassengerDto>> updatePassenger(
+            @PathVariable Long id,
+            @Valid @RequestBody PassengerDto requestDto
+    ) {
         PassengerDto updated = passengerService.updatePassengerOrThrow(id, requestDto);
         return ResponseEntity.ok(ApiResponse.success(updated, "Passenger updated successfully"));
     }

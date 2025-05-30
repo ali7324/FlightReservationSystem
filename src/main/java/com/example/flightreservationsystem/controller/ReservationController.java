@@ -4,7 +4,6 @@ import com.example.flightreservationsystem.dto.ReservationDto;
 import com.example.flightreservationsystem.dto.ApiResponse;
 import com.example.flightreservationsystem.enums.ReservationStatus;
 import com.example.flightreservationsystem.service.ReservationService;
-import com.example.flightreservationsystem.validation.ReservationValidator;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
@@ -21,7 +20,6 @@ import java.util.stream.Collectors;
 public class ReservationController {
 
     private final ReservationService reservationService;
-    private final ReservationValidator reservationValidator;
 
     @GetMapping
     public ResponseEntity<ApiResponse<List<ReservationDto>>> getAllReservations() {
@@ -38,16 +36,7 @@ public class ReservationController {
     }
 
     @PostMapping
-    public ResponseEntity<ApiResponse<ReservationDto>> createReservation(@RequestBody ReservationDto reservationDto, Errors errors) {
-        reservationValidator.validate(reservationDto, errors);
-
-        if (errors.hasErrors()) {
-            String errorMsg = errors.getAllErrors().stream()
-                    .map(e -> e.getDefaultMessage())
-                    .collect(Collectors.joining("; "));
-            return ResponseEntity.badRequest().body(ApiResponse.error(errorMsg));
-        }
-
+    public ResponseEntity<ApiResponse<ReservationDto>> createReservation(@Valid @RequestBody ReservationDto reservationDto) {
         ReservationDto created = reservationService.createReservation(reservationDto);
         return ResponseEntity.ok(ApiResponse.success(created, "Reservation created successfully"));
     }
@@ -55,18 +44,8 @@ public class ReservationController {
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<ReservationDto>> updateReservation(
             @PathVariable Long id,
-            @RequestBody ReservationDto reservationDto,
-            Errors errors
+            @Valid @RequestBody ReservationDto reservationDto
     ) {
-        reservationValidator.validate(reservationDto, errors);
-
-        if (errors.hasErrors()) {
-            String errorMsg = errors.getAllErrors().stream()
-                    .map(e -> e.getDefaultMessage())
-                    .collect(Collectors.joining("; "));
-            return ResponseEntity.badRequest().body(ApiResponse.error(errorMsg));
-        }
-
         ReservationDto updated = reservationService.updateReservationOrThrow(id, reservationDto);
         return ResponseEntity.ok(ApiResponse.success(updated, "Reservation updated successfully"));
     }

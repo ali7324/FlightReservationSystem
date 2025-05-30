@@ -1,5 +1,9 @@
 package com.example.flightreservationsystem.service;
 
+import com.example.flightreservationsystem.dto.FlightDto;
+import com.example.flightreservationsystem.dto.PassengerDto;
+import com.example.flightreservationsystem.entity.FlightEntity;
+import com.example.flightreservationsystem.entity.PassengerEntity;
 import com.example.flightreservationsystem.enums.ReservationStatus;
 import com.example.flightreservationsystem.exception.ResourceNotFoundException;
 import com.example.flightreservationsystem.mapper.FlightMapper;
@@ -7,6 +11,8 @@ import com.example.flightreservationsystem.mapper.PassengerMapper;
 import com.example.flightreservationsystem.mapper.ReservationMapper;
 import com.example.flightreservationsystem.dto.ReservationDto;
 import com.example.flightreservationsystem.entity.ReservationEntity;
+import com.example.flightreservationsystem.repository.FlightRepository;
+import com.example.flightreservationsystem.repository.PassengerRepository;
 import com.example.flightreservationsystem.repository.ReservationRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -20,11 +26,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ReservationService {
 
+
     private final ReservationRepository reservationRepository;
+    private final FlightRepository flightRepository;
+    private final PassengerRepository passengerRepository;
     private final ReservationMapper reservationMapper;
-    private final MailService mailService;
     private final PassengerMapper passengerMapper;
     private final FlightMapper flightMapper;
+    private final MailService mailService;
 
     public List<ReservationDto> getAllReservations() {
         log.info("Fetching all reservations");
@@ -43,17 +52,25 @@ public class ReservationService {
     public ReservationDto createReservation(ReservationDto dto) {
         log.info("Creating reservation for passenger ID: {}", dto.getPassengerId());
 
+        PassengerEntity passenger = passengerRepository.findById(dto.getPassengerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Passenger not found with ID: " + dto.getPassengerId()));
+
+        FlightEntity flight = flightRepository.findById(dto.getFlightId())
+                .orElseThrow(() -> new ResourceNotFoundException("Flight not found with ID: " + dto.getFlightId()));
+
         ReservationEntity entity = reservationMapper.toEntity(dto);
+        entity.setPassenger(passenger);
+        entity.setFlight(flight);
+
         ReservationEntity saved = reservationRepository.save(entity);
 
         try {
-            mailService.sendReservationConfirmationMail(dto.getPassenger(), dto.getFlight());
-            log.info("Confirmation email sent to: {}", dto.getPassenger().getGmail());
+            mailService.sendReservationConfirmationMail(passengerMapper.toDto(passenger), flightMapper.toDto(flight));
+            log.info("Confirmation email sent to: {}", passenger.getGmail());
         } catch (Exception e) {
             log.error("Failed to send confirmation email: {}", e.getMessage());
         }
 
-        log.info("Reservation created with ID: {}", saved.getId());
         return reservationMapper.toDto(saved);
     }
 
@@ -63,12 +80,18 @@ public class ReservationService {
         ReservationEntity existing = reservationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with ID: " + id));
 
+        PassengerEntity passenger = passengerRepository.findById(dto.getPassengerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Passenger not found with ID: " + dto.getPassengerId()));
+
+        FlightEntity flight = flightRepository.findById(dto.getFlightId())
+                .orElseThrow(() -> new ResourceNotFoundException("Flight not found with ID: " + dto.getFlightId()));
+
         ReservationEntity updated = reservationMapper.toEntity(dto);
         updated.setId(existing.getId());
+        updated.setPassenger(passenger);
+        updated.setFlight(flight);
 
-        ReservationEntity saved = reservationRepository.save(updated);
-        log.info("Reservation updated with ID: {}", saved.getId());
-        return reservationMapper.toDto(saved);
+        return reservationMapper.toDto(reservationRepository.save(updated));
     }
 
     public void deleteReservation(Long id) {
@@ -87,16 +110,33 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with ID: " + id));
 
         reservation.setStatus(status);
-        ReservationEntity updated = reservationRepository.save(reservation);
+        return reservationMapper.toDto(reservationRepository.save(reservation));
+    }
 
-        return reservationMapper.toDto(updated);
+    public ReservationDto cancelReservation(Long id) {
+        log.info("Cancelling reservation with ID: {}", id);
+
+        ReservationEntity reservation = reservationRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with ID: " + id));
+
+        reservation.setStatus(ReservationStatus.CANCELLED);
+        return reservationMapper.toDto(reservationRepository.save(reservation));
+    }
+
+    public List<ReservationDto> getReservationHistory() {
+        log.info("Retrieving cancelled reservation history");
+
+        return reservationRepository.findAll().stream()
+                .filter(r -> r.getStatus() == ReservationStatus.CANCELLED)
+                .map(reservationMapper::toDto)
+                .collect(Collectors.toList());
     }
 
     public void sendUpcomingFlightReminders() {
         log.info("Running daily reminder job for upcoming confirmed flights");
 
         List<ReservationEntity> reservations = reservationRepository.findTomorrowConfirmedReservations();
-        log.info("Found {} confirmed reservations with flights scheduled for tomorrow", reservations.size());
+        log.info("Found {} confirmed reservations for tomorrow", reservations.size());
 
         for (ReservationEntity reservation : reservations) {
             try {
@@ -106,41 +146,8 @@ public class ReservationService {
                 );
                 log.info("Reminder email sent to {}", reservation.getPassenger().getGmail());
             } catch (Exception e) {
-                log.error("Failed to send reminder email to {}: {}", reservation.getPassenger().getGmail(), e.getMessage());
+                log.error("Failed to send reminder email: {}", e.getMessage());
             }
         }
-
-        log.info("Daily reminder job completed");
-    }
-
-
-    public ReservationDto cancelReservation(Long id) {
-        log.info("Cancelling reservation with ID: {}", id);
-
-        ReservationEntity reservation = reservationRepository.findById(id)
-                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with ID: " + id));
-
-        reservation.setStatus(ReservationStatus.CANCELLED);
-        ReservationEntity cancelled = reservationRepository.save(reservation);
-
-        return reservationMapper.toDto(cancelled);
-    }
-
-    public List<ReservationDto> getReservationHistory() {
-        log.info("Retrieving cancelled reservation history");
-
-        List<ReservationEntity> pastReservations = reservationRepository.findAll().stream()
-                .filter(r -> r.getStatus() == ReservationStatus.CANCELLED)
-                .toList();
-
-        if (pastReservations.isEmpty()) {
-            log.info("No cancelled reservations found");
-        } else {
-            log.info("Found {} cancelled reservations", pastReservations.size());
-        }
-
-        return pastReservations.stream()
-                .map(reservationMapper::toDto)
-                .toList();
     }
 }

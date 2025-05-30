@@ -4,6 +4,8 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 @Getter
@@ -36,9 +38,8 @@ public class PassengerEntity {
     @Column(name = "gmail", nullable = false)
     private String gmail;
 
-    @OneToOne
-    @JoinColumn(name = "flight_id")
-    private FlightEntity flight;
+    @OneToMany(mappedBy = "passenger", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReservationEntity> reservations = new ArrayList<>();
 
     @Override
     public boolean equals(Object o) {
