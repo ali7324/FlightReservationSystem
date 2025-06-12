@@ -1,7 +1,5 @@
 package com.example.flightreservationsystem.service;
 
-import com.example.flightreservationsystem.dto.FlightDto;
-import com.example.flightreservationsystem.dto.PassengerDto;
 import com.example.flightreservationsystem.entity.FlightEntity;
 import com.example.flightreservationsystem.entity.PassengerEntity;
 import com.example.flightreservationsystem.enums.ReservationStatus;
@@ -25,7 +23,6 @@ import java.util.stream.Collectors;
 @Service
 @RequiredArgsConstructor
 public class ReservationService {
-
 
     private final ReservationRepository reservationRepository;
     private final FlightRepository flightRepository;
