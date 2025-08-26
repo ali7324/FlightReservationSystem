@@ -27,7 +27,8 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**").permitAll()
+                        .requestMatchers("/auth/**", "/v1/mail/**").permitAll() // ✅ Mail endpointləri də permitAll
+                        .requestMatchers("/flight/**", "/passengers/**", "/reservations/**", "/api/payments/**").authenticated() // ✅ Bütün API'lər üçün authentication tələb et
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

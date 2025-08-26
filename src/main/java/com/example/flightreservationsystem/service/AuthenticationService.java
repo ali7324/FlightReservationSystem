@@ -5,6 +5,7 @@ import com.example.flightreservationsystem.entity.UserEntity;
 import com.example.flightreservationsystem.repository.UserRepository;
 import com.example.flightreservationsystem.security.JwtService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -12,6 +13,7 @@ import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationService {
 
     private final UserRepository userRepository;
@@ -20,6 +22,8 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthDto register(AuthDto request) {
+        log.info("Register method started for email: {}", request.getEmail());
+
         UserEntity user = UserEntity.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
@@ -29,6 +33,7 @@ public class AuthenticationService {
         userRepository.save(user);
         String token = jwtService.generateToken(user);
 
+        log.info("Register method completed successfully for email: {}", request.getEmail());
         return AuthDto.builder()
                 .email(user.getEmail())
                 .role(user.getRole())
@@ -37,6 +42,8 @@ public class AuthenticationService {
     }
 
     public AuthDto login(AuthDto request) {
+        log.info("Login method started for email: {}", request.getEmail());
+
         authenticationManager.authenticate(
                 new UsernamePasswordAuthenticationToken(
                         request.getEmail(),
@@ -45,10 +52,14 @@ public class AuthenticationService {
         );
 
         UserEntity user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> {
+                    log.error("Login failed - User not found: {}", request.getEmail());
+                    return new RuntimeException("User not found");
+                });
 
         String token = jwtService.generateToken(user);
 
+        log.info("Login method completed successfully for email: {}", request.getEmail());
         return AuthDto.builder()
                 .email(user.getEmail())
                 .role(user.getRole())

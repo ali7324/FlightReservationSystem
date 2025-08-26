@@ -6,6 +6,7 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 
 import java.security.Key;
@@ -37,6 +38,13 @@ public class JwtService {
         return extractClaim(token, Claims::getSubject);
     }
 
+    // ✅ YENİ METOD: UserDetails üçün
+    public boolean isTokenValid(String token, UserDetails userDetails) {
+        final String username = extractUsername(token);
+        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+    }
+
+    // ✅ KÖHNƏ METOD: UserEntity üçün (əlavə saxladım)
     public boolean isTokenValid(String token, UserEntity user) {
         final String username = extractUsername(token);
         return username.equals(user.getEmail()) && !isTokenExpired(token);
