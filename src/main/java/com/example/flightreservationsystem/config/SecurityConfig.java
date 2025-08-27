@@ -27,8 +27,16 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/auth/**", "/v1/mail/**").permitAll() // ✅ Mail endpointləri də permitAll
-                        .requestMatchers("/flight/**", "/passengers/**", "/reservations/**", "/api/payments/**").authenticated() // ✅ Bütün API'lər üçün authentication tələb et
+                        // SWAGGER ÜÇÜN ICACƏ VER
+                        .requestMatchers(
+                                "/swagger-ui.html",
+                                "/swagger-ui/**",
+                                "/v3/api-docs/**",
+                                "/swagger-resources/**",
+                                "/webjars/**"
+                        ).permitAll()
+                        .requestMatchers("/auth/**", "/v1/mail/**").permitAll()
+                        .requestMatchers("/flight/**", "/passengers/**", "/reservations/**", "/api/payments/**").authenticated()
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session

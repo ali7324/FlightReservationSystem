@@ -28,14 +28,15 @@ spring:
     database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
-    enabled: true
+    enabled: false
     locations: classpath:db/migration
 
-springdoc:
-  api-docs:
-    path: /api-docs
-  swagger-ui:
-    path: /swagger-ui.html
-    operationsSorter: method
-  default-produces-media-type: application/json
-  default-consumes-media-type: application/json
+# ===== SPRINGDOC KONFİQURASIYASINI SİLİN VƏ YA ŞƏRHƏ ALIN =====
+#springdoc:
+#  api-docs:
+#    path: /api-docs
+#  swagger-ui:
+#    path: /swagger-ui.html
+#    operationsSorter: method
+#  default-produces-media-type: application/json
+#  default-consumes-media-type: application/json
