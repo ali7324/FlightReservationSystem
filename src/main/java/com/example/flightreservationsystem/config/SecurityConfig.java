@@ -27,7 +27,6 @@ public class SecurityConfig {
         http
                 .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
-                        // SWAGGER ÜÇÜN ICACƏ VER
                         .requestMatchers(
                                 "/swagger-ui.html",
                                 "/swagger-ui/**",
