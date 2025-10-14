@@ -1,7 +1,7 @@
 package com.example.flightreservationsystem.dto;
 
 import com.example.flightreservationsystem.enums.ReservationStatus;
-import jakarta.validation.constraints.FutureOrPresent;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
@@ -14,7 +14,6 @@ import java.time.LocalDateTime;
 @Builder
 public class ReservationDto {
 
-
     private Long id;
 
     @NotNull(message = "Flight ID is required.")
@@ -23,8 +22,7 @@ public class ReservationDto {
     @NotNull(message = "Passenger ID is required.")
     private Long passengerId;
 
-    @NotNull(message = "Reservation date is required.")
-    @FutureOrPresent(message = "Reservation date cannot be in the past.")
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private LocalDateTime reservationDate;
 
     @NotNull(message = "Reservation status is required.")
@@ -33,4 +31,6 @@ public class ReservationDto {
     private FlightDto flight;
     private PassengerDto passenger;
 
+    // NOTE: Service qatında: flight mövcudluğu, seat availability,
+    // overbooking yoxlaması kimi biznes qaydaları
 }

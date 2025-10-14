@@ -10,10 +10,9 @@ import org.springframework.stereotype.Component;
 @Component
 @RequiredArgsConstructor
 public class ReminderScheduler {
-
     private final ReservationService reservationService;
 
-    @Scheduled(cron = "0 0 8 * * *")
+    @Scheduled(cron = "0 0 8 * * *", zone = "Asia/Baku")
     public void runReminderJob() {
         log.info("Running reminder job for upcoming flights...");
         reservationService.sendUpcomingFlightReminders();

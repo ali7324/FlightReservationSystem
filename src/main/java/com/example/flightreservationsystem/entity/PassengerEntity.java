@@ -3,7 +3,7 @@ package com.example.flightreservationsystem.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -13,32 +13,34 @@ import java.util.Objects;
 @AllArgsConstructor
 @NoArgsConstructor
 @Entity
-@Table(name = "passenger")
+@Table(name = "passengers")
 @Builder
 public class PassengerEntity {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(name = "first_name", nullable = false)
+    @Column(name = "first_name", nullable = false, length = 80)
     private String firstName;
 
-    @Column(name = "last_name", nullable = false)
+    @Column(name = "last_name", nullable = false, length = 80)
     private String lastName;
 
     @Column(name = "age", nullable = false)
     private int age;
 
-    @Column(name = "gender", nullable = false)
+    @Column(name = "gender", nullable = false, length = 10)
     private String gender;
 
     @Column(name = "date_of_birth", nullable = false)
-    private LocalDateTime dateOfBirth;
+    private LocalDate dateOfBirth;
 
-    @Column(name = "gmail", nullable = false)
-    private String gmail;
+    @Column(name = "email", nullable = false, length = 160)
+    private String email;
 
     @OneToMany(mappedBy = "passenger", cascade = CascadeType.ALL, orphanRemoval = true)
+    @ToString.Exclude
     private List<ReservationEntity> reservations = new ArrayList<>();
 
     @Override

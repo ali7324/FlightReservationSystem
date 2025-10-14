@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/v1/mail")
+@RequestMapping("/api/v1/mail")
 @RequiredArgsConstructor
 public class MailController {
 
@@ -16,11 +16,7 @@ public class MailController {
 
     @PostMapping("/test-send-reservation")
     public ApiResponse<Void> sendTestReservationMail(@Valid @RequestBody MailTestRequest request) {
-        try {
-            mailService.sendReservationConfirmationMail(request.getPassenger(), request.getFlight());
-            return ApiResponse.success("Test reservation mail sent successfully", null);
-        } catch (Exception e) {
-            return ApiResponse.error("Error sending test reservation mail: " + e.getMessage());
-        }
+        mailService.sendReservationConfirmationMail(request.getPassenger(), request.getFlight());
+        return ApiResponse.ok("Test reservation mail sent successfully", null);
     }
 }

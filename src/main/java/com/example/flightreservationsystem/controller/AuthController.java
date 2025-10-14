@@ -8,7 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/auth")
+@RequestMapping("/api/v1/auth")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -16,21 +16,14 @@ public class AuthController {
 
     @PostMapping("/register")
     public ApiResponse<AuthDto> register(@Valid @RequestBody AuthDto request) {
-        try {
-            AuthDto response = authService.register(request);
-            return ApiResponse.success("User registered successfully", response);
-        } catch (Exception e) {
-            return ApiResponse.error("Registration failed: " + e.getMessage());
-        }
+        // Uğursuzluqlar GlobalExceptionHandler tərəfindən 400/409 və s. kimi qaytarılacaq
+        AuthDto response = authService.register(request);
+        return ApiResponse.ok("User registered successfully", response);
     }
 
     @PostMapping("/login")
     public ApiResponse<AuthDto> login(@Valid @RequestBody AuthDto request) {
-        try {
-            AuthDto response = authService.login(request);
-            return ApiResponse.success("Login successful", response);
-        } catch (Exception e) {
-            return ApiResponse.error("Login failed: " + e.getMessage());
-        }
+        AuthDto response = authService.login(request);
+        return ApiResponse.ok("Login successful", response);
     }
 }

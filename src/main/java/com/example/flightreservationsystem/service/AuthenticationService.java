@@ -2,6 +2,8 @@ package com.example.flightreservationsystem.service;
 
 import com.example.flightreservationsystem.dto.AuthDto;
 import com.example.flightreservationsystem.entity.UserEntity;
+import com.example.flightreservationsystem.enums.Role;
+import com.example.flightreservationsystem.exception.ResourceNotFoundException;
 import com.example.flightreservationsystem.repository.UserRepository;
 import com.example.flightreservationsystem.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -10,6 +12,7 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -21,19 +24,26 @@ public class AuthenticationService {
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
 
+    @Transactional
     public AuthDto register(AuthDto request) {
-        log.info("Register method started for email: {}", request.getEmail());
+        log.info("Register started: {}", request.getEmail());
+
+        userRepository.findByEmail(request.getEmail()).ifPresent(u -> {
+            throw new IllegalArgumentException("Email is already in use");
+        });
+
+        Role role = request.getRole() != null ? request.getRole() : Role.USER;
 
         UserEntity user = UserEntity.builder()
                 .email(request.getEmail())
                 .password(passwordEncoder.encode(request.getPassword()))
-                .role(request.getRole())
+                .role(role)
                 .build();
 
         userRepository.save(user);
         String token = jwtService.generateToken(user);
 
-        log.info("Register method completed successfully for email: {}", request.getEmail());
+        log.info("Register completed: {}", request.getEmail());
         return AuthDto.builder()
                 .email(user.getEmail())
                 .role(user.getRole())
@@ -42,24 +52,18 @@ public class AuthenticationService {
     }
 
     public AuthDto login(AuthDto request) {
-        log.info("Login method started for email: {}", request.getEmail());
+        log.info("Login started: {}", request.getEmail());
 
         authenticationManager.authenticate(
-                new UsernamePasswordAuthenticationToken(
-                        request.getEmail(),
-                        request.getPassword()
-                )
+                new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword())
         );
 
         UserEntity user = userRepository.findByEmail(request.getEmail())
-                .orElseThrow(() -> {
-                    log.error("Login failed - User not found: {}", request.getEmail());
-                    return new RuntimeException("User not found");
-                });
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + request.getEmail()));
 
         String token = jwtService.generateToken(user);
 
-        log.info("Login method completed successfully for email: {}", request.getEmail());
+        log.info("Login completed: {}", request.getEmail());
         return AuthDto.builder()
                 .email(user.getEmail())
                 .role(user.getRole())

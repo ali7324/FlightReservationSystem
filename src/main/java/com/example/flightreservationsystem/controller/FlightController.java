@@ -6,13 +6,14 @@ import com.example.flightreservationsystem.service.FlightService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
 
 @RestController
-@RequestMapping("/flight")
+@RequestMapping("/api/v1/flights")
 @RequiredArgsConstructor
 public class FlightController {
 
@@ -20,55 +21,32 @@ public class FlightController {
 
     @GetMapping
     public ApiResponse<List<FlightDto>> getAllFlights() {
-        try {
-            List<FlightDto> flights = flightService.getAllFlights();
-            return ApiResponse.success("All flights retrieved successfully", flights);
-        } catch (Exception e) {
-            return ApiResponse.error("Error retrieving flights: " + e.getMessage());
-        }
+        return ApiResponse.ok("All flights retrieved successfully", flightService.getAllFlights());
     }
 
     @GetMapping("/{id}")
     public ApiResponse<FlightDto> getFlightById(@PathVariable Long id) {
-        try {
-            FlightDto flight = flightService.getFlightOrThrow(id);
-            return ApiResponse.success("Flight retrieved successfully", flight);
-        } catch (Exception e) {
-            return ApiResponse.error("Error retrieving flight: " + e.getMessage());
-        }
+        return ApiResponse.ok("Flight retrieved successfully", flightService.getFlightOrThrow(id));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PostMapping
     public ApiResponse<FlightDto> addFlight(@Valid @RequestBody FlightDto flightDto) {
-        try {
-            FlightDto created = flightService.createFlight(flightDto);
-            return ApiResponse.success("Flight created successfully", created);
-        } catch (Exception e) {
-            return ApiResponse.error("Error creating flight: " + e.getMessage());
-        }
+        return ApiResponse.ok("Flight created successfully", flightService.createFlight(flightDto));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @PutMapping("/{id}")
-    public ApiResponse<FlightDto> updateFlight(
-            @PathVariable Long id,
-            @Valid @RequestBody FlightDto flightDto
-    ) {
-        try {
-            FlightDto updated = flightService.updateFlightOrThrow(id, flightDto);
-            return ApiResponse.success("Flight updated successfully", updated);
-        } catch (Exception e) {
-            return ApiResponse.error("Error updating flight: " + e.getMessage());
-        }
+    public ApiResponse<FlightDto> updateFlight(@PathVariable Long id,
+                                               @Valid @RequestBody FlightDto flightDto) {
+        return ApiResponse.ok("Flight updated successfully", flightService.updateFlightOrThrow(id, flightDto));
     }
 
+    @PreAuthorize("hasRole('ADMIN')")
     @DeleteMapping("/{id}")
     public ApiResponse<Void> deleteFlight(@PathVariable Long id) {
-        try {
-            flightService.deleteFlight(id);
-            return ApiResponse.success("Flight deleted successfully", null);
-        } catch (Exception e) {
-            return ApiResponse.error("Error deleting flight: " + e.getMessage());
-        }
+        flightService.deleteFlight(id);
+        return ApiResponse.ok("Flight deleted successfully", null);
     }
 
     @GetMapping("/search")
@@ -76,13 +54,8 @@ public class FlightController {
             @RequestParam(required = false) String flightNumber,
             @RequestParam(required = false) String departure,
             @RequestParam(required = false) String destination,
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate departureDate
-    ) {
-        try {
-            List<FlightDto> results = flightService.searchFlights(flightNumber, departure, destination, departureDate);
-            return ApiResponse.success("Filtered flight results retrieved successfully", results);
-        } catch (Exception e) {
-            return ApiResponse.error("Error searching flights: " + e.getMessage());
-        }
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate departureDate) {
+        return ApiResponse.ok("Filtered flight results retrieved successfully",
+                flightService.searchFlights(flightNumber, departure, destination, departureDate));
     }
 }

@@ -2,41 +2,39 @@ server:
   port: 8080
 
 spring:
-  mail:
-    host: smtp.gmail.com
-    port: 587
-    username: qafarali91@gmail.com
-    password: "aisx fbyi psvu hmfr"
-    properties:
-      mail:
-        auth: true
-        smtp:
-          starttls.enable: true
   datasource:
-    url: jdbc:postgresql://localhost:5432/flight_db
-    username: postgres
-    password: password
-    driver-class-name: org.postgresql.Driver
+    url: "jdbc:postgresql://localhost:5432/flight_db"
+    username: "postgres"
+    password: "password"
+    driver-class-name: "org.postgresql.Driver"
 
   jpa:
+    open-in-view: false
     hibernate:
       ddl-auto: update
     show-sql: true
+    database-platform: "org.hibernate.dialect.PostgreSQLDialect"
     properties:
       hibernate:
         format_sql: true
-    database-platform: org.hibernate.dialect.PostgreSQLDialect
 
   flyway:
     enabled: false
-    locations: classpath:db/migration
+    locations: "classpath:db/migration"
 
+  mail:
+    host: "smtp.gmail.com"
+    port: 587
+    username: "${MAIL_USERNAME:qafarali91@gmail.com}"
+    password: "${MAIL_PASSWORD:change-me}"
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 
-#springdoc:
-#  api-docs:
-#    path: /api-docs
-#  swagger-ui:
-#    path: /swagger-ui.html
-#    operationsSorter: method
-#  default-produces-media-type: application/json
-#  default-consumes-media-type: application/json
+app:
+  jwt:
+    secret: "${APP_JWT_SECRET:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx}"  # Base64 256-bit
+    expiration-ms: 86400000

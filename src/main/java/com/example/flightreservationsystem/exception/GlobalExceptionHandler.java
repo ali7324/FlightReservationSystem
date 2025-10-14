@@ -1,50 +1,103 @@
 package com.example.flightreservationsystem.exception;
 
 import com.example.flightreservationsystem.dto.ApiResponse;
+import jakarta.validation.ConstraintViolation;
 import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
+import org.springframework.security.access.AccessDeniedException;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
-import java.util.Map;
 import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+    /* 404 - Not Found */
     @ExceptionHandler(ResourceNotFoundException.class)
-    public ApiResponse<Void> handleResourceNotFound(ResourceNotFoundException ex) {
+    public ResponseEntity<ApiResponse<Void>> handleResourceNotFound(ResourceNotFoundException ex) {
         log.warn("Resource not found: {}", ex.getMessage());
-        return ApiResponse.error(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(ApiResponse.fail(ex.getMessage()));
     }
 
+    /* 400 - Bean Validation (@Valid) field errors */
     @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ApiResponse<Map<String, String>> handleValidationErrors(MethodArgumentNotValidException ex) {
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationErrors(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error ->
-                errors.put(error.getField(), error.getDefaultMessage()));
+        ex.getBindingResult().getFieldErrors()
+                .forEach(err -> errors.put(err.getField(), err.getDefaultMessage()));
 
         log.warn("Validation failed: {}", errors);
-        return ApiResponse.error("Validation failed", errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.fail("Validation failed", errors));
     }
 
-    @ExceptionHandler(IllegalArgumentException.class)
-    public ApiResponse<String> handleIllegalArgument(IllegalArgumentException ex) {
-        log.warn("Illegal argument: {}", ex.getMessage());
-        return ApiResponse.error(ex.getMessage());
-    }
-
+    /* 400 - Constraint violations (query/path param validation) */
     @ExceptionHandler(ConstraintViolationException.class)
-    public ApiResponse<String> handleConstraintViolation(ConstraintViolationException ex) {
-        log.warn("Constraint violation: {}", ex.getMessage());
-        return ApiResponse.error("Constraint violation: " + ex.getMessage());
+    public ResponseEntity<ApiResponse<Map<String, String>>> handleConstraintViolation(ConstraintViolationException ex) {
+        Map<String, String> errors = new HashMap<>();
+        for (ConstraintViolation<?> v : ex.getConstraintViolations()) {
+            String field = v.getPropertyPath() != null ? v.getPropertyPath().toString() : "param";
+            errors.put(field, v.getMessage());
+        }
+        log.warn("Constraint violation: {}", errors);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.fail("Constraint violation", errors));
     }
 
+    /* 400 - Wrong/missing request formats */
+    @ExceptionHandler({
+            HttpMessageNotReadableException.class,
+            MethodArgumentTypeMismatchException.class,
+            MissingServletRequestParameterException.class,
+            IllegalArgumentException.class
+    })
+    public ResponseEntity<ApiResponse<Void>> handleBadRequest(Exception ex) {
+        log.warn("Bad request: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(ApiResponse.fail("Bad request: " + ex.getMessage()));
+    }
+
+    /* 401 - Bad credentials (fallback; primary 401 SecurityEntryPoint-dədir) */
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ApiResponse<Void>> handleBadCredentials(BadCredentialsException ex) {
+        log.warn("Bad credentials: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+                .body(ApiResponse.fail("Unauthorized"));
+    }
+
+    /* 403 - Access denied (fallback; primary 403 AccessDeniedHandler-dədir) */
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
+        log.warn("Access denied: {}", ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                .body(ApiResponse.fail("Forbidden"));
+    }
+
+    /* 409 - Unique constraint, FK, etc. */
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ApiResponse<Void>> handleDataIntegrity(DataIntegrityViolationException ex) {
+        log.warn("Data integrity violation: {}", ex.getMostSpecificCause().getMessage());
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(ApiResponse.fail("Data integrity violation"));
+    }
+
+    /* 500 - Generic fallback */
     @ExceptionHandler(Exception.class)
-    public ApiResponse<String> handleGenericException(Exception ex) {
-        log.error("Unhandled exception occurred: {}", ex.getMessage(), ex);
-        return ApiResponse.error("Internal server error: " + ex.getMessage());
+    public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex) {
+        log.error("Unhandled exception occurred", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                .body(ApiResponse.fail("Internal server error"));
     }
 }

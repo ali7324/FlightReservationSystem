@@ -3,7 +3,7 @@ package com.example.flightreservationsystem.dto;
 import jakarta.validation.constraints.*;
 import lombok.*;
 
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -11,7 +11,6 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @Builder
 public class PassengerDto {
-
 
     private Long id;
 
@@ -23,7 +22,7 @@ public class PassengerDto {
 
     @Min(value = 0, message = "Age must be at least 0.")
     @Max(value = 150, message = "Age must be less than or equal to 150.")
-    private int age;
+    private Integer age;
 
     @NotBlank(message = "Gender is required.")
     @Pattern(regexp = "Male|Female|Other", message = "Gender must be Male, Female, or Other.")
@@ -31,11 +30,13 @@ public class PassengerDto {
 
     @NotNull(message = "Date of birth is required.")
     @Past(message = "Date of birth must be in the past.")
-    private LocalDateTime dateOfBirth;
+    private LocalDate dateOfBirth;
 
     @NotBlank(message = "Email is required.")
     @Email(message = "Invalid email format.")
-    private String gmail;
+    private String email;
 
     private FlightDto flight;
+
+    // NOTE: Service qatında (opsional): age ilə dateOfBirth uyğunluğunu yoxla
 }

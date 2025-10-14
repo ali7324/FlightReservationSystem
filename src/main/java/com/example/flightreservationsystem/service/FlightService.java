@@ -1,17 +1,18 @@
 package com.example.flightreservationsystem.service;
 
-import com.example.flightreservationsystem.exception.ResourceNotFoundException;
-import com.example.flightreservationsystem.mapper.FlightMapper;
 import com.example.flightreservationsystem.dto.FlightDto;
 import com.example.flightreservationsystem.entity.FlightEntity;
+import com.example.flightreservationsystem.exception.ResourceNotFoundException;
+import com.example.flightreservationsystem.mapper.FlightMapper;
 import com.example.flightreservationsystem.repository.FlightRepository;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -25,7 +26,7 @@ public class FlightService {
         log.info("Fetching all flights");
         return flightRepository.findAll().stream()
                 .map(flightMapper::toDto)
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public FlightDto getFlightOrThrow(Long id) {
@@ -35,38 +36,49 @@ public class FlightService {
                 .orElseThrow(() -> new ResourceNotFoundException("Flight not found with ID: " + id));
     }
 
+    @Transactional
     public FlightDto createFlight(FlightDto flightDto) {
-        log.info("Creating new flight: {}", flightDto.getFlightNumber());
-        FlightEntity entity = flightMapper.toEntity(flightDto);
-        FlightEntity saved = flightRepository.save(entity);
-        log.info("Flight created with ID: {}", saved.getId());
+        validateFlightTimes(flightDto.getDepartureTime(), flightDto.getArrivalTime());
+        log.info("Creating flight {}", flightDto.getFlightNumber());
+        FlightEntity saved = flightRepository.save(flightMapper.toEntity(flightDto));
         return flightMapper.toDto(saved);
     }
 
+    @Transactional
     public FlightDto updateFlightOrThrow(Long id, FlightDto flightDto) {
-        log.info("Updating flight with ID: {}", id);
+        log.info("Updating flight {}", id);
         FlightEntity existing = flightRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Flight not found with ID: " + id));
 
+        validateFlightTimes(flightDto.getDepartureTime(), flightDto.getArrivalTime());
+
         FlightEntity updated = flightMapper.toEntity(flightDto);
         updated.setId(existing.getId());
-
-        FlightEntity saved = flightRepository.save(updated);
-        log.info("Flight updated successfully with ID: {}", saved.getId());
-        return flightMapper.toDto(saved);
+        return flightMapper.toDto(flightRepository.save(updated));
     }
 
+    @Transactional
     public void deleteFlight(Long id) {
-        log.info("Deleting flight with ID: {}", id);
+        log.info("Deleting flight {}", id);
         if (!flightRepository.existsById(id)) {
             throw new ResourceNotFoundException("Flight not found with ID: " + id);
         }
         flightRepository.deleteById(id);
-        log.info("Flight deleted with ID: {}", id);
+    }
+
+    public List<FlightEntity> searchRaw(String flightNumber, String departure, String destination, LocalDate departureDate) {
+        return flightRepository.searchFlights(flightNumber, departure, destination, departureDate);
     }
 
     public List<FlightDto> searchFlights(String flightNumber, String departure, String destination, LocalDate departureDate) {
-        List<FlightEntity> results = flightRepository.searchFlights(flightNumber, departure, destination, departureDate);
-        return results.stream().map(flightMapper::toDto).toList();
+        return searchRaw(flightNumber, departure, destination, departureDate).stream()
+                .map(flightMapper::toDto)
+                .toList();
+    }
+
+    private void validateFlightTimes(LocalDateTime dep, LocalDateTime arr) {
+        if (dep == null || arr == null) throw new IllegalArgumentException("Departure and arrival times are required");
+        if (dep.isBefore(LocalDateTime.now())) throw new IllegalArgumentException("Departure time must be in the future");
+        if (!arr.isAfter(dep)) throw new IllegalArgumentException("Arrival time must be after departure time");
     }
 }

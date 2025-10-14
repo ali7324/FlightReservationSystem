@@ -5,25 +5,19 @@ import com.example.flightreservationsystem.dto.PaymentDto;
 import com.example.flightreservationsystem.service.PaymentService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/payments")
+@RequestMapping("/api/v1/payments")
 @RequiredArgsConstructor
 public class PaymentController {
 
     private final PaymentService paymentService;
 
+    @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @PostMapping
     public ApiResponse<String> makePayment(@Valid @RequestBody PaymentDto dto) {
-        try {
-            String message = paymentService.processPayment(dto);
-            return ApiResponse.success("Payment processed successfully", message);
-        } catch (Exception e) {
-            return ApiResponse.error("Payment failed: " + e.getMessage());
-        }
+        return ApiResponse.ok("Payment processed successfully", paymentService.processPayment(dto));
     }
 }
