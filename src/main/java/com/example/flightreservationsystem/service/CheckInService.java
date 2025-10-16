@@ -7,6 +7,7 @@ import com.example.flightreservationsystem.entity.ReservationEntity;
 import com.example.flightreservationsystem.enums.ReservationStatus;
 import com.example.flightreservationsystem.exception.ResourceNotFoundException;
 import com.example.flightreservationsystem.repository.ReservationRepository;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
