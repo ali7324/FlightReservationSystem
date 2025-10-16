@@ -69,7 +69,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail("Bad request: " + ex.getMessage()));
     }
 
-    // 401
+    // 401 login sehv name yada sifre
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse<Void>> handleBadCredentials(BadCredentialsException ex) {
         log.warn("Bad credentials: {}", ex.getMessage());
@@ -77,7 +77,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail("Unauthorized"));
     }
 
-    // 403
+    // 403  icaze yoxdu
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
         log.warn("Access denied: {}", ex.getMessage());
@@ -93,7 +93,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail("Data integrity violation"));
     }
 
-    // 500
+    // 500 qalan ne var ne yox hamisi
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex) {
         log.error("Unhandled exception occurred", ex);

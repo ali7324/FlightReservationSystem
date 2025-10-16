@@ -59,16 +59,17 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             filterChain.doFilter(request, response);
 
         } catch (io.jsonwebtoken.ExpiredJwtException ex) {
-            write401(response, "Token expired");
+            write401(response, "Token expired"); //vaxti bitib
         } catch (io.jsonwebtoken.security.SignatureException ex) {
-            write401(response, "Invalid token signature");
+            write401(response, "Invalid token signature");//sehvdir
         } catch (io.jsonwebtoken.MalformedJwtException ex) {
-            write401(response, "Malformed token");
+            write401(response, "Malformed token");//formati sehvdir
         } catch (Exception ex) {
-            write401(response, "Unauthorized");
+            write401(response, "Unauthorized");//qalan ne var ne yox sehv hallar
         }
     }
 
+    //401 json cavabi yazan
     private void write401(HttpServletResponse response, String message) throws IOException {
         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);

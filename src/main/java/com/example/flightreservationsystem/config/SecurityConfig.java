@@ -49,8 +49,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(ex -> ex
-                        .authenticationEntryPoint(authenticationEntryPoint())  // 401 JSON
-                        .accessDeniedHandler(accessDeniedHandler())            // 403 JSON
+                        .authenticationEntryPoint(authenticationEntryPoint())  // 401 ucun
+                        .accessDeniedHandler(accessDeniedHandler())            // 403 ucun
                 )
                 .authorizeHttpRequests(auth -> auth
                         // Swagger & docs
@@ -84,20 +84,20 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 401 -> ApiResponse JSON
+    // 401
     @Bean
     public AuthenticationEntryPoint authenticationEntryPoint() {
         return (HttpServletRequest request, HttpServletResponse response, AuthenticationException ex) ->
                 writeJson(response, HttpServletResponse.SC_UNAUTHORIZED, ApiResponse.fail("Unauthorized"));
     }
 
-    // 403 -> ApiResponse JSON
+    // 403
     @Bean
     public AccessDeniedHandler accessDeniedHandler() {
         return (request, response, ex) ->
                 writeJson(response, HttpServletResponse.SC_FORBIDDEN, ApiResponse.fail("Forbidden"));
     }
-
+    //HttpServletResponse a  jsonu yazan  metod
     private void writeJson(HttpServletResponse response, int status, Object body) throws IOException {
         response.setStatus(status);
         response.setContentType(MediaType.APPLICATION_JSON_VALUE);
@@ -105,6 +105,7 @@ public class SecurityConfig {
         response.getWriter().write(objectMapper.writeValueAsString(body));
     }
 
+    //(frontend domenləri, metodlar, başlıqlar)
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration cfg = new CorsConfiguration();
@@ -118,12 +119,12 @@ public class SecurityConfig {
         source.registerCorsConfiguration("/**", cfg);
         return source;
     }
-
+    //login ucun
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {
         return config.getAuthenticationManager();
     }
-
+    //hashlemek ucun
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();

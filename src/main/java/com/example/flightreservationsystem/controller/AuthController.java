@@ -23,7 +23,7 @@ public class AuthController {
 
     @PostMapping("/login")
     public ApiResponse<AuthDto> login(@Valid @RequestBody AuthDto request) {
-        AuthDto response = authService.login(request);
+        AuthDto response = authService.login(request); //tokene zada
         return ApiResponse.ok("Login successful", response);
     }
 }

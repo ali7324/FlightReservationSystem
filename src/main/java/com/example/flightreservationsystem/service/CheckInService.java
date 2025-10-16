@@ -48,7 +48,7 @@ public class CheckInService {
                     .windowEnd(windowEnd)
                     .build();
         }
-        if (now.isAfter(windowEnd)) {
+        if (now.isAfter(windowEnd)) { //acilmiyibsa
             return CheckInEligibilityDto.builder()
                     .eligible(false)
                     .reason("Flight departure time passed")
@@ -56,7 +56,7 @@ public class CheckInService {
                     .windowEnd(windowEnd)
                     .build();
         }
-        if (r.getStatus() == ReservationStatus.CHECKED_IN) {
+        if (r.getStatus() == ReservationStatus.CHECKED_IN) { //vaxti bitib
             return CheckInEligibilityDto.builder()
                     .eligible(false)
                     .reason("Already checked-in")
@@ -64,7 +64,7 @@ public class CheckInService {
                     .windowEnd(windowEnd)
                     .build();
         }
-
+        //okdu
         return CheckInEligibilityDto.builder()
                 .eligible(true)
                 .reason("OK")

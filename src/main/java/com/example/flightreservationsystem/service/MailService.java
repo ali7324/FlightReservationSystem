@@ -48,7 +48,7 @@ public class MailService {
             throw new RuntimeException("E-poçt göndərilə bilmədi: " + e.getMessage());
         }
     }
-
+    //xatirlatma sabah ucursan
     public void sendReminderEmail(PassengerDto passengerDto, FlightDto flightDto) {
         String fullName = passengerDto.getFirstName() + " " + passengerDto.getLastName();
         String body = String.format(
