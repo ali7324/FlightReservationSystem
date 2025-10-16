@@ -75,7 +75,7 @@ public class SecurityConfig {
                                 "/api/v1/check-in/**"   // <-- əlavə olundu
                         ).authenticated()
 
-                        // qalan hər şey
+                        // o biri hər şey
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())

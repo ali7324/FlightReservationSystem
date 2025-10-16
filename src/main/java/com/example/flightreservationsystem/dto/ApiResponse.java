@@ -14,7 +14,7 @@ public class ApiResponse<T> {
     private String message;
     private T data;
 
-    /* ---- OK ---- */
+    //ok
     public static <U> ApiResponse<U> ok(U data) {
         return new ApiResponse<>(true, null, data);
     }
@@ -23,7 +23,7 @@ public class ApiResponse<T> {
         return new ApiResponse<>(true, message, data);
     }
 
-    /* ---- FAIL ---- */
+    //fail
     public static ApiResponse<Void> fail(String message) {
         return new ApiResponse<>(false, message, null);
     }
@@ -32,7 +32,7 @@ public class ApiResponse<T> {
         return new ApiResponse<>(false, message, data);
     }
 
-    /* ---- (İstəsən əvvəlki adlar da qalsın) ---- */
+
     public static <U> ApiResponse<U> success(U data) { return ok(data); }
     public static <U> ApiResponse<U> success(String message, U data) { return ok(message, data); }
     public static ApiResponse<Void> error(String message) { return fail(message); }

@@ -38,7 +38,7 @@ class MailServiceTest {
         when(f.getFlightNumber()).thenReturn(no);
         when(f.getDestination()).thenReturn(destination);
         when(f.getDepartureTime()).thenReturn(dep);
-        // bəzən istifadə olunmur – lenient
+
         lenient().when(f.getArrivalTime()).thenReturn(arr);
         lenient().when(f.getPrice()).thenReturn(priceOrNull);
         return f;

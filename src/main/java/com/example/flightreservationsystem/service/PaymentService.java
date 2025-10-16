@@ -45,13 +45,13 @@ public class PaymentService {
             throw new IllegalStateException("Only PENDING reservations can be paid");
         }
 
-        // expiry check MM/YY
+
         YearMonth expiry = parseExpiry(dto.getExpiryDate());
         if (expiry.isBefore(YearMonth.now())) {
             throw new IllegalArgumentException("Card expired");
         }
 
-        // amount check (uçuş qiymətindən az olmasın)
+
         BigDecimal amount = dto.getAmount();
         BigDecimal flightPrice = toBigDecimal(getFlightPriceNumber(reservation));
         if (amount == null || flightPrice == null || amount.compareTo(flightPrice) < 0) {
@@ -97,9 +97,9 @@ public class PaymentService {
         return "Payment is pending. Please wait for confirmation.";
     }
 
-    /* --- helpers --- */
 
-    // NOTE: private DEYİL — testdə spy ilə stub üçün
+
+
     PaymentStatus simulatePaymentStatus() {
         return PaymentStatus.values()[new Random().nextInt(PaymentStatus.values().length)];
     }
@@ -111,21 +111,18 @@ public class PaymentService {
     }
 
     private YearMonth parseExpiry(String mmYY) {
-        // format MM/YY
+
         int month = Integer.parseInt(mmYY.substring(0, 2));
         int year = 2000 + Integer.parseInt(mmYY.substring(3, 5));
         return YearMonth.of(year, month);
     }
 
-    /**
-     * FlightEntity#getPrice() tipi layihədə BigDecimal və ya double/Double ola bilər.
-     * Bu funksiya onu Number kimi götürür ki, test/prod hər iki halda işləsin.
-     */
+
     private Number getFlightPriceNumber(ReservationEntity reservation) {
         return reservation.getFlight().getPrice();
     }
 
-    /** Number -> BigDecimal normalizasiyası */
+
     private BigDecimal toBigDecimal(Number n) {
         if (n == null) return null;
         if (n instanceof BigDecimal bd) return bd;

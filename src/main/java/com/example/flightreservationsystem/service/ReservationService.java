@@ -69,7 +69,7 @@ public class ReservationService {
 
         ReservationEntity saved = reservationRepository.save(entity);
 
-        // İstəyə görə: rezervasiya yaradıldığını bildirmək (SUCCESS payment-də də ayrıca mail gedir)
+
         try {
             mailService.sendReservationConfirmationMail(
                     passengerMapper.toDto(passenger),
@@ -103,7 +103,7 @@ public class ReservationService {
         updated.setId(existing.getId());
         updated.setPassenger(passenger);
         updated.setFlight(flight);
-        // reservationDate-i server saxlayır
+
         updated.setReservationDate(existing.getReservationDate());
 
         return reservationMapper.toDto(reservationRepository.save(updated));
@@ -152,10 +152,10 @@ public class ReservationService {
                 .toList();
     }
 
-    /** Scheduler-in çağırdığı metod */
+
     public void sendUpcomingFlightReminders() {
         log.info("Running daily reminder job for upcoming confirmed flights...");
-        // Sənin repository-də parametrsiz native query var:
+
         List<ReservationEntity> reservations = reservationRepository.findTomorrowConfirmedReservations();
         log.info("Found {} confirmed reservations for tomorrow", reservations.size());
 

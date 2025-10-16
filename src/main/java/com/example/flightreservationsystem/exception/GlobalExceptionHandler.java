@@ -23,7 +23,7 @@ import java.util.Map;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    /* 404 - Not Found */
+    //404
     @ExceptionHandler(ResourceNotFoundException.class)
     public ResponseEntity<ApiResponse<Void>> handleResourceNotFound(ResourceNotFoundException ex) {
         log.warn("Resource not found: {}", ex.getMessage());
@@ -31,7 +31,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail(ex.getMessage()));
     }
 
-    /* 400 - Bean Validation (@Valid) field errors */
+    //400
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ApiResponse<Map<String, String>>> handleValidationErrors(MethodArgumentNotValidException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -43,7 +43,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail("Validation failed", errors));
     }
 
-    /* 400 - Constraint violations (query/path param validation) */
+    //400
     @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<ApiResponse<Map<String, String>>> handleConstraintViolation(ConstraintViolationException ex) {
         Map<String, String> errors = new HashMap<>();
@@ -56,7 +56,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail("Constraint violation", errors));
     }
 
-    /* 400 - Wrong/missing request formats */
+    // 400
     @ExceptionHandler({
             HttpMessageNotReadableException.class,
             MethodArgumentTypeMismatchException.class,
@@ -69,7 +69,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail("Bad request: " + ex.getMessage()));
     }
 
-    /* 401 - Bad credentials (fallback; primary 401 SecurityEntryPoint-dədir) */
+    // 401
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ApiResponse<Void>> handleBadCredentials(BadCredentialsException ex) {
         log.warn("Bad credentials: {}", ex.getMessage());
@@ -77,7 +77,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail("Unauthorized"));
     }
 
-    /* 403 - Access denied (fallback; primary 403 AccessDeniedHandler-dədir) */
+    // 403
     @ExceptionHandler(AccessDeniedException.class)
     public ResponseEntity<ApiResponse<Void>> handleAccessDenied(AccessDeniedException ex) {
         log.warn("Access denied: {}", ex.getMessage());
@@ -85,7 +85,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail("Forbidden"));
     }
 
-    /* 409 - Unique constraint, FK, etc. */
+    // 409
     @ExceptionHandler(DataIntegrityViolationException.class)
     public ResponseEntity<ApiResponse<Void>> handleDataIntegrity(DataIntegrityViolationException ex) {
         log.warn("Data integrity violation: {}", ex.getMostSpecificCause().getMessage());
@@ -93,7 +93,7 @@ public class GlobalExceptionHandler {
                 .body(ApiResponse.fail("Data integrity violation"));
     }
 
-    /* 500 - Generic fallback */
+    // 500
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ApiResponse<Void>> handleGenericException(Exception ex) {
         log.error("Unhandled exception occurred", ex);

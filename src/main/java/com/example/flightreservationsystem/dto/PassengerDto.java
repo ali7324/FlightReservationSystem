@@ -38,5 +38,5 @@ public class PassengerDto {
 
     private FlightDto flight;
 
-    // NOTE: Service qatında (opsional): age ilə dateOfBirth uyğunluğunu yoxla
+
 }

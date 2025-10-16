@@ -11,5 +11,5 @@ import lombok.*;
 @Builder
 public class BoardingPassDto {
     private Long reservationId;
-    private String boardingPassCode;  // məsələn: BP-123456-AB7XQ2
+    private String boardingPassCode;
 }

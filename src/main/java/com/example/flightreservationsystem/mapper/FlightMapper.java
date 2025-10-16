@@ -8,10 +8,10 @@ import org.mapstruct.Mapping;
 @Mapper(componentModel = "spring")
 public interface FlightMapper {
 
-    // Entity -> DTO: reservations sahəsi DTO-da yoxdur, problem deyil
+
     FlightDto toDto(FlightEntity entity);
 
-    // DTO -> Entity: reservations döngə yaratmasın deyə ignore edirik
+
     @Mapping(target = "reservations", ignore = true)
     FlightEntity toEntity(FlightDto dto);
 }

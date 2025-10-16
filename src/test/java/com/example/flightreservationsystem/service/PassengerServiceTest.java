@@ -30,7 +30,7 @@ class PassengerServiceTest {
     @InjectMocks
     private PassengerService passengerService;
 
-    // ---- Helpers ----
+
     private PassengerEntity entity(Long id, String first, String last, String email) {
         PassengerEntity e = new PassengerEntity();
         e.setId(id);
@@ -39,8 +39,8 @@ class PassengerServiceTest {
         e.setAge(25);
         e.setGender("Male");
         LocalDate dob = LocalDate.now().minusYears(25);
-        e.setDateOfBirth(dob);            // <-- LocalDate
-        e.setEmail(email);                // səndə field 'email'dirsə bunu saxla
+        e.setDateOfBirth(dob);
+        e.setEmail(email);
         return e;
     }
 
@@ -52,11 +52,10 @@ class PassengerServiceTest {
                 .lastName(last)
                 .age(25)
                 .gender("Male")
-                .dateOfBirth(dob)         // <-- LocalDate
+                .dateOfBirth(dob)
                 .email(email)
                 .build();
     }
-    // ------------------------------------------------------------
 
     @Test
     @DisplayName("getAllPassengers: repo -> mapper -> dto list")

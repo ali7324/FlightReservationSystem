@@ -94,7 +94,7 @@ public class CheckInService {
     }
 
     private String generateBoardingPass(Long reservationId) {
-        // Sadə 6 simvolluq alfanumeric
+
         String alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
         StringBuilder sb = new StringBuilder();
         for (int i = 0; i < 6; i++) sb.append(alphabet.charAt(RNG.nextInt(alphabet.length())));

@@ -28,7 +28,6 @@ class UserDetailsServiceImplTest {
     void loadUserByUsername_found() {
         String email = "test@example.com";
 
-        // Real entity quraq ki, getter-lər null olmasın
         UserEntity user = UserEntity.builder()
                 .email(email)
                 .password("ENC")

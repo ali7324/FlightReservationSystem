@@ -23,7 +23,7 @@ public class AuthDto {
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private String password;
 
-    // Register üçün tələb oluna bilər; login üçün zəruri deyil
+
     private Role role;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)

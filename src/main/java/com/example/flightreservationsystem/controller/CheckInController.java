@@ -16,14 +16,14 @@ public class CheckInController {
 
     private final CheckInService checkInService;
 
-    // USER və ADMIN görə bilsin
+    // user və admin gore bilsin
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @GetMapping("/eligibility")
     public ApiResponse<CheckInEligibilityDto> eligibility(@RequestParam Long reservationId) {
         return ApiResponse.ok("Eligibility calculated", checkInService.checkEligibility(reservationId));
     }
 
-    // USER və ADMIN icra etsin
+    // user və admin nese elesin
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @PostMapping("/{reservationId}")
     public ApiResponse<BoardingPassDto> checkIn(@PathVariable Long reservationId) {

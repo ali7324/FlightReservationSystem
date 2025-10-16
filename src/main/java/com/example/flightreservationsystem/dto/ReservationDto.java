@@ -31,6 +31,5 @@ public class ReservationDto {
     private FlightDto flight;
     private PassengerDto passenger;
 
-    // NOTE: Service qatında: flight mövcudluğu, seat availability,
-    // overbooking yoxlaması kimi biznes qaydaları
+
 }

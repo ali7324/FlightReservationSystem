@@ -42,19 +42,17 @@ class PaymentServiceTest {
     @InjectMocks
     private PaymentService paymentService;
 
-    private PaymentService spyService; // simulatePaymentStatus üçün spy
+    private PaymentService spyService;
 
     @BeforeEach
     void makeSpy() {
         spyService = Mockito.spy(paymentService);
     }
 
-    /* ---------- Helpers ---------- */
 
     private ReservationEntity mockReservationBare(Long id, ReservationStatus status) {
         ReservationEntity r = mock(ReservationEntity.class, Answers.RETURNS_DEEP_STUBS);
         when(r.getStatus()).thenReturn(status);
-        // getPassenger()/getFlight() lazımdırsa testdə ayrıca stub edəcəyik
         return r;
     }
 
@@ -81,7 +79,6 @@ class PaymentServiceTest {
     }
 
 
-    /* ---------- Tests ---------- */
 
     @Test
     @DisplayName("Kart maskalanması – save olunan PaymentEntity-də yoxlanır")
@@ -91,7 +88,6 @@ class PaymentServiceTest {
         when(reservationRepository.findById(rid)).thenReturn(Optional.of(r));
         when(paymentRepository.save(any(PaymentEntity.class))).thenAnswer(inv -> inv.getArgument(0));
 
-        // statusu PENDING saxlayırıq ki, rezervasiya dəyişməsin
         doReturn(PaymentStatus.PENDING).when(spyService).simulatePaymentStatus();
 
         PaymentDto in = paymentDto(rid, "4111111111111111", "123", futureMMYY(12), new BigDecimal("150"));
@@ -115,11 +111,9 @@ class PaymentServiceTest {
             ReservationEntity r = mockReservationWithPrice(rid, ReservationStatus.PENDING, new BigDecimal("200"));
             when(reservationRepository.findById(rid)).thenReturn(Optional.of(r));
 
-            // amount null
             assertThrows(IllegalArgumentException.class,
                     () -> paymentService.processPayment(paymentDto(rid, "4111", "123", futureMMYY(12), null)));
 
-            // amount < price
             assertThrows(IllegalArgumentException.class,
                     () -> paymentService.processPayment(paymentDto(rid, "4111", "123", futureMMYY(12), new BigDecimal("199.99"))));
 
@@ -175,11 +169,9 @@ class PaymentServiceTest {
             when(reservationRepository.findById(rid)).thenReturn(Optional.of(r));
             when(paymentRepository.save(any(PaymentEntity.class))).thenAnswer(inv -> inv.getArgument(0));
 
-            // mail üçün mapper-lər
             when(passengerMapper.toDto(any())).thenReturn(new PassengerDto());
             when(flightMapper.toDto(any())).thenReturn(new FlightDto());
 
-            // statusu SUCCESS edirik
             doReturn(PaymentStatus.SUCCESS).when(spyService).simulatePaymentStatus();
 
             String msg = spyService.processPayment(paymentDto(rid, "4111111111111111", "123", futureMMYY(6), new BigDecimal("150")));

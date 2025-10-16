@@ -35,5 +35,5 @@ public class PaymentDto {
     @NotNull(message = "Reservation ID is required.")
     private Long reservationId;
 
-    // NOTE: Service qatında: expiryDate VAQTLARINI yoxla (bitmiş olmasın)
+
 }

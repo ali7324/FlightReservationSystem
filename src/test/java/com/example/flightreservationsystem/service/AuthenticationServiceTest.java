@@ -34,7 +34,7 @@ class AuthenticationServiceTest {
     @InjectMocks
     private AuthenticationService authenticationService;
 
-    // -------------- register() --------------
+    //register
     @Nested
     @DisplayName("register()")
     class RegisterTests {
@@ -77,7 +77,7 @@ class AuthenticationServiceTest {
             verify(passwordEncoder).encode(rawPw);
             verify(jwtService).generateToken(saved);
 
-            // başqa lazımsız çağırış olmasın
+
             verifyNoMoreInteractions(jwtService, passwordEncoder, userRepository);
         }
 
@@ -126,14 +126,14 @@ class AuthenticationServiceTest {
             IllegalArgumentException ex = assertThrows(IllegalArgumentException.class,
                     () -> authenticationService.register(request));
 
-            // mətni tam yox, məzmununu yoxlayırıq (daha dayanıqlı)
+
             assertTrue(ex.getMessage().toLowerCase().contains("email"));
             verify(userRepository, never()).save(any());
             verify(jwtService, never()).generateToken(any());
         }
     }
 
-    // -------------- login() --------------
+    //login
     @Nested
     @DisplayName("login()")
     class LoginTests {

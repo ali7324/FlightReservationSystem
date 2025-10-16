@@ -16,7 +16,7 @@ public class AuthController {
 
     @PostMapping("/register")
     public ApiResponse<AuthDto> register(@Valid @RequestBody AuthDto request) {
-        // Uğursuzluqlar GlobalExceptionHandler tərəfindən 400/409 və s. kimi qaytarılacaq
+
         AuthDto response = authService.register(request);
         return ApiResponse.ok("User registered successfully", response);
     }

@@ -31,9 +31,9 @@ class CheckInServiceTest {
     @InjectMocks
     private CheckInService checkInService;
 
-    /* ---------- Helpers ---------- */
+    //helper
 
-    /** Eligibility üçün tək dəfə findById stubu. */
+
     private void stubFindById_ForEligibility(Long id, ReservationStatus status, LocalDateTime departureTime) {
         ReservationEntity r = mock(ReservationEntity.class, Answers.RETURNS_DEEP_STUBS);
         when(r.getStatus()).thenReturn(status);
@@ -41,7 +41,6 @@ class CheckInServiceTest {
         when(reservationRepository.findById(id)).thenReturn(Optional.of(r));
     }
 
-    /** Uğurlu check-in ssenarisi üçün ardıcıl 2 dəfə eyni reservation qaytaran findById. */
     private ReservationEntity stubFindById_ForSuccessfulCheckIn(Long id, LocalDateTime departureTime) {
         ReservationEntity r = mock(ReservationEntity.class, Answers.RETURNS_DEEP_STUBS);
         when(r.getStatus()).thenReturn(ReservationStatus.CONFIRMED);
@@ -54,7 +53,7 @@ class CheckInServiceTest {
         return r;
     }
 
-    /* ---------- Tests ---------- */
+    //tests
 
     @Nested
     @DisplayName("checkEligibility()")
@@ -146,7 +145,7 @@ class CheckInServiceTest {
         @DisplayName("Eligible deyil: IllegalStateException və save çağırılmır")
         void notEligible_throws_andNoSave() {
             Long id = 10L;
-            // Pəncərə hələ açılmayıb
+
             LocalDateTime dep = LocalDateTime.now().plusHours(40);
             stubFindById_ForEligibility(id, ReservationStatus.CONFIRMED, dep);
 
@@ -169,7 +168,6 @@ class CheckInServiceTest {
             assertNotNull(bp.getBoardingPassCode());
             assertTrue(bp.getBoardingPassCode().startsWith("BP-" + id + "-"));
 
-            // status dəyişdirilməsi çağırılıb
             verify(r).setStatus(ReservationStatus.CHECKED_IN);
             verify(reservationRepository).save(r);
         }

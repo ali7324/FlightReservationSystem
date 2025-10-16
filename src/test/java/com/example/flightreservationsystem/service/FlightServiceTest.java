@@ -31,7 +31,7 @@ class FlightServiceTest {
     @InjectMocks
     private FlightService flightService;
 
-    // ---- Helpers ----
+
     private FlightEntity entity(Long id, String no, LocalDateTime dep, LocalDateTime arr) {
         FlightEntity e = new FlightEntity();
         e.setId(id);
@@ -40,7 +40,7 @@ class FlightServiceTest {
         e.setDestination("IST");
         e.setDepartureTime(dep);
         e.setArrivalTime(arr);
-        e.setPrice(new BigDecimal("199.99"));   // <-- burada
+        e.setPrice(new BigDecimal("199.99"));
         return e;
     }
 
@@ -52,11 +52,10 @@ class FlightServiceTest {
                 .destination("IST")
                 .departureTime(dep)
                 .arrivalTime(arr)
-                .price(new BigDecimal("199.99")) // <-- burada
+                .price(new BigDecimal("199.99"))
                 .build();
     }
 
-    // -----------------
 
     @Test
     @DisplayName("getAllFlights(): repo -> mapper -> dto list")

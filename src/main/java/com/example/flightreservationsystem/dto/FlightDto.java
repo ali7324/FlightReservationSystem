@@ -40,5 +40,5 @@ public class FlightDto {
     @DecimalMin(value = "0.01", message = "Price must be greater than 0")
     private BigDecimal price;
 
-    // NOTE: Service qatında: arrivalTime > departureTime olmalıdır (biznes qaydası)
+
 }

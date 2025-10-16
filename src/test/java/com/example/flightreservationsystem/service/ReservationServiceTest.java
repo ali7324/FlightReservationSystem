@@ -43,11 +43,11 @@ class ReservationServiceTest {
     @InjectMocks
     private ReservationService reservationService;
 
-    // ---- helpers ----
+
     private PassengerEntity passenger(Long id, String email) {
         PassengerEntity p = new PassengerEntity();
         p.setId(id);
-        p.setEmail(email);              // <-- DÜZƏLDİLDİ (email -> gmail)
+        p.setEmail(email);
         p.setFirstName("A");
         p.setLastName("B");
         return p;
@@ -81,7 +81,6 @@ class ReservationServiceTest {
         return d;
     }
 
-    // ----- tests -----
 
     @Test
     @DisplayName("getAllReservations(): bütün rezervasiyalar DTO-ya map olunur")
@@ -136,7 +135,6 @@ class ReservationServiceTest {
             saved.setReservationDate(LocalDateTime.now());
             when(reservationRepository.save(any())).thenReturn(saved);
 
-            // map back
             when(reservationMapper.toDto(saved)).thenReturn(dto(300L, p.getId(), f.getId(), ReservationStatus.PENDING));
 
             when(passengerMapper.toDto(p)).thenReturn(new PassengerDto());
@@ -145,7 +143,7 @@ class ReservationServiceTest {
             ReservationDto out = reservationService.createReservation(inDto);
 
             assertEquals(300L, out.getId());
-            // entity-nin PENDING-ə set olunmasını və passenger/flight bağlanmasını yoxlayaq
+
             ArgumentCaptor<ReservationEntity> cap = ArgumentCaptor.forClass(ReservationEntity.class);
             verify(reservationRepository).save(cap.capture());
             assertEquals(ReservationStatus.PENDING, cap.getValue().getStatus());
