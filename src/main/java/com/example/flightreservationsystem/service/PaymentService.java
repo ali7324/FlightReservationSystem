@@ -80,7 +80,7 @@ public class PaymentService {
                 PassengerDto passengerDto = passengerMapper.toDto(reservation.getPassenger());
                 FlightDto flightDto = flightMapper.toDto(reservation.getFlight());
                 mailService.sendReservationConfirmationMail(passengerDto, flightDto);
-                log.info("Confirmation email sent to {}", passengerDto.getEmail());
+                log.info("Confirmation email sent to {}", passengerDto.getEmail()); // << düzəliş
             } catch (Exception e) {
                 log.warn("Email send failed after successful payment: {}", e.getMessage());
             }
@@ -99,7 +99,8 @@ public class PaymentService {
 
     /* --- helpers --- */
 
-    private PaymentStatus simulatePaymentStatus() {
+    // NOTE: private DEYİL — testdə spy ilə stub üçün
+    PaymentStatus simulatePaymentStatus() {
         return PaymentStatus.values()[new Random().nextInt(PaymentStatus.values().length)];
     }
 
@@ -117,11 +118,10 @@ public class PaymentService {
     }
 
     /**
-     * FlightEntity#getPrice() tipi layihəndə BigDecimal və ya double/Double ola bilər.
-     * Bu funksiya onu Number kimi götürür.
+     * FlightEntity#getPrice() tipi layihədə BigDecimal və ya double/Double ola bilər.
+     * Bu funksiya onu Number kimi götürür ki, test/prod hər iki halda işləsin.
      */
     private Number getFlightPriceNumber(ReservationEntity reservation) {
-        // BigDecimal extends Number; Double da Number-dır; primitive double autobox olacaq.
         return reservation.getFlight().getPrice();
     }
 
@@ -129,7 +129,6 @@ public class PaymentService {
     private BigDecimal toBigDecimal(Number n) {
         if (n == null) return null;
         if (n instanceof BigDecimal bd) return bd;
-        // longValue/doubleValue fallback
         if (n instanceof Long || n instanceof Integer) return BigDecimal.valueOf(n.longValue());
         return BigDecimal.valueOf(n.doubleValue());
     }
