@@ -1,9 +1,11 @@
 package com.example.flightreservationsystem.service;
 
 import com.example.flightreservationsystem.dto.AuthDto;
+import com.example.flightreservationsystem.entity.PassengerEntity;
 import com.example.flightreservationsystem.entity.UserEntity;
 import com.example.flightreservationsystem.enums.Role;
 import com.example.flightreservationsystem.exception.ResourceNotFoundException;
+import com.example.flightreservationsystem.repository.PassengerRepository;
 import com.example.flightreservationsystem.repository.UserRepository;
 import com.example.flightreservationsystem.security.JwtService;
 import lombok.RequiredArgsConstructor;
@@ -20,6 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 public class AuthenticationService {
 
     private final UserRepository userRepository;
+    private final PassengerRepository passengerRepository; // ⬅️ YENİ: Passenger üçün
     private final PasswordEncoder passwordEncoder;
     private final JwtService jwtService;
     private final AuthenticationManager authenticationManager;
@@ -39,8 +42,22 @@ public class AuthenticationService {
                 .password(passwordEncoder.encode(request.getPassword()))
                 .role(role)
                 .build();
-
         userRepository.save(user);
+
+        passengerRepository.findByEmail(request.getEmail()).orElseGet(() -> {
+            PassengerEntity p = PassengerEntity.builder()
+                    .firstName(request.getFirstName())
+                    .lastName(request.getLastName())
+                    .age(request.getAge())
+                    .gender(request.getGender())
+                    .dateOfBirth(request.getDateOfBirth())
+                    .email(request.getEmail())
+                    .build();
+            PassengerEntity saved = passengerRepository.save(p);
+            log.info("Passenger auto-created id={} for email={}", saved.getId(), saved.getEmail());
+            return saved;
+        });
+
         String token = jwtService.generateToken(user);
 
         log.info("Register completed: {}", request.getEmail());

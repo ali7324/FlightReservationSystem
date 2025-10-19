@@ -32,8 +32,7 @@ public class PaymentDto {
     @DecimalMin(value = "0.01", message = "Amount must be greater than 0.")
     private BigDecimal amount;
 
-    @NotNull(message = "Reservation ID is required.")
+    // ⬇️ CREATE zamanı server dolduracaq, ona görə @NotNull SİLİNDİ
+    @JsonProperty(access = JsonProperty.Access.WRITE_ONLY)
     private Long reservationId;
-
-
 }

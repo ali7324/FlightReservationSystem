@@ -26,7 +26,7 @@ public class PaymentEntity {
     @Column(length = 8)
     private String cvv;
 
-    @Column(length = 7) // MM/YY
+    @Column(length = 7)
     private String expiryDate;
 
     @Column(nullable = false, precision = 12, scale = 2)
@@ -37,11 +37,14 @@ public class PaymentEntity {
     private PaymentStatus status;
 
     @OneToOne
-    @JoinColumn(name = "reservation_id", nullable = false)
+    @JoinColumn(name = "reservation_id", nullable = false, unique = true)
     private ReservationEntity reservation;
 
     @Column(name = "created_at", nullable = false)
     private LocalDateTime createdAt;
+
+    @Column(name = "refunded_at")
+    private LocalDateTime refundedAt;
 
     @PrePersist
     void onCreate() {

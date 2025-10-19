@@ -2,6 +2,7 @@ package com.example.flightreservationsystem.controller;
 
 import com.example.flightreservationsystem.dto.ApiResponse;
 import com.example.flightreservationsystem.dto.ReservationDto;
+import com.example.flightreservationsystem.dto.request.CreateReservationRequest;
 import com.example.flightreservationsystem.enums.ReservationStatus;
 import com.example.flightreservationsystem.service.ReservationService;
 import jakarta.validation.Valid;
@@ -20,25 +21,33 @@ public class ReservationController {
 
     @GetMapping
     public ApiResponse<List<ReservationDto>> getAllReservations() {
-        return ApiResponse.ok("All reservations retrieved successfully", reservationService.getAllReservations());
+        return ApiResponse.ok("All reservations retrieved successfully",
+                reservationService.getAllReservations());
     }
 
     @GetMapping("/{id}")
     public ApiResponse<ReservationDto> getReservationById(@PathVariable Long id) {
-        return ApiResponse.ok("Reservation retrieved successfully", reservationService.getReservationOrThrow(id));
+        return ApiResponse.ok("Reservation retrieved successfully",
+                reservationService.getReservationOrThrow(id));
     }
 
+    // Rezervasiya + Ödəniş biryerdə
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @PostMapping
-    public ApiResponse<ReservationDto> createReservation(@Valid @RequestBody ReservationDto reservationDto) {
-        return ApiResponse.ok("Reservation created successfully", reservationService.createReservation(reservationDto));
+    public ApiResponse<ReservationDto> createReservation(@Valid @RequestBody CreateReservationRequest request) {
+        ReservationDto result = reservationService.createReservationWithPayment(
+                request.getReservation(),
+                request.getPayment()
+        );
+        return ApiResponse.ok("Reservation created and payment processed", result);
     }
 
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @PutMapping("/{id}")
     public ApiResponse<ReservationDto> updateReservation(@PathVariable Long id,
                                                          @Valid @RequestBody ReservationDto reservationDto) {
-        return ApiResponse.ok("Reservation updated successfully", reservationService.updateReservationOrThrow(id, reservationDto));
+        return ApiResponse.ok("Reservation updated successfully",
+                reservationService.updateReservationOrThrow(id, reservationDto));
     }
 
     @PreAuthorize("hasRole('ADMIN')")
@@ -52,17 +61,21 @@ public class ReservationController {
     @PatchMapping("/{id}/status")
     public ApiResponse<ReservationDto> updateReservationStatus(@PathVariable Long id,
                                                                @RequestParam ReservationStatus status) {
-        return ApiResponse.ok("Reservation status updated successfully", reservationService.updateReservationStatus(id, status));
+        return ApiResponse.ok("Reservation status updated successfully",
+                reservationService.updateReservationStatus(id, status));
     }
+
 
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @PatchMapping("/{id}/cancel")
     public ApiResponse<ReservationDto> cancelReservation(@PathVariable Long id) {
-        return ApiResponse.ok("Reservation cancelled successfully", reservationService.cancelReservation(id));
+        return ApiResponse.ok("Reservation cancelled successfully",
+                reservationService.cancelReservation(id));
     }
 
     @GetMapping("/history")
     public ApiResponse<List<ReservationDto>> getCancelledReservations() {
-        return ApiResponse.ok("Cancelled reservation history retrieved successfully", reservationService.getReservationHistory());
+        return ApiResponse.ok("Cancelled reservation history retrieved successfully",
+                reservationService.getReservationHistory());
     }
 }

@@ -45,12 +45,10 @@ public class PaymentService {
             throw new IllegalStateException("Only PENDING reservations can be paid");
         }
 
-
         YearMonth expiry = parseExpiry(dto.getExpiryDate());
         if (expiry.isBefore(YearMonth.now())) {
             throw new IllegalArgumentException("Card expired");
         }
-
 
         BigDecimal amount = dto.getAmount();
         BigDecimal flightPrice = toBigDecimal(getFlightPriceNumber(reservation));
@@ -80,7 +78,7 @@ public class PaymentService {
                 PassengerDto passengerDto = passengerMapper.toDto(reservation.getPassenger());
                 FlightDto flightDto = flightMapper.toDto(reservation.getFlight());
                 mailService.sendReservationConfirmationMail(passengerDto, flightDto);
-                log.info("Confirmation email sent to {}", passengerDto.getEmail()); // << düzəliş
+                log.info("Confirmation email sent to {}", passengerDto.getEmail());
             } catch (Exception e) {
                 log.warn("Email send failed after successful payment: {}", e.getMessage());
             }
@@ -97,8 +95,21 @@ public class PaymentService {
         return "Payment is pending. Please wait for confirmation.";
     }
 
+    //burani duzeltmeli idim duzeltdim
+    @Transactional
+    public void refundPayment(Long reservationId) {
+        PaymentEntity payment = paymentRepository.findByReservation_Id(reservationId)
+                .orElseThrow(() -> new ResourceNotFoundException("Payment not found for reservation: " + reservationId));
 
-
+        if (payment.getStatus() == PaymentStatus.SUCCESS) {
+            payment.setStatus(PaymentStatus.REFUNDED);
+            payment.setRefundedAt(LocalDateTime.now());
+            paymentRepository.save(payment);
+            log.info("Payment refunded for reservationId={}", reservationId);
+        } else {
+            log.info("Refund skipped for reservationId={}, payment status={}", reservationId, payment.getStatus());
+        }
+    }
 
     PaymentStatus simulatePaymentStatus() {
         return PaymentStatus.values()[new Random().nextInt(PaymentStatus.values().length)];
@@ -111,17 +122,14 @@ public class PaymentService {
     }
 
     private YearMonth parseExpiry(String mmYY) {
-
         int month = Integer.parseInt(mmYY.substring(0, 2));
         int year = 2000 + Integer.parseInt(mmYY.substring(3, 5));
         return YearMonth.of(year, month);
     }
 
-
     private Number getFlightPriceNumber(ReservationEntity reservation) {
         return reservation.getFlight().getPrice();
     }
-
 
     private BigDecimal toBigDecimal(Number n) {
         if (n == null) return null;

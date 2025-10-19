@@ -29,11 +29,18 @@ public class FlightService {
                 .toList();
     }
 
-    public FlightDto getFlightOrThrow(Long id) {
+
+    public FlightDto getFlightByIdOrThrow(Long id) {
         log.info("Fetching flight with ID: {}", id);
         return flightRepository.findById(id)
                 .map(flightMapper::toDto)
                 .orElseThrow(() -> new ResourceNotFoundException("Flight not found with ID: " + id));
+    }
+
+
+    @Deprecated
+    public FlightDto getFlightOrThrow(Long id) {
+        return getFlightByIdOrThrow(id);
     }
 
     @Transactional
@@ -44,8 +51,9 @@ public class FlightService {
         return flightMapper.toDto(saved);
     }
 
+
     @Transactional
-    public FlightDto updateFlightOrThrow(Long id, FlightDto flightDto) {
+    public FlightDto updateFlightByIdOrThrow(Long id, FlightDto flightDto) {
         log.info("Updating flight {}", id);
         FlightEntity existing = flightRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Flight not found with ID: " + id));
@@ -55,6 +63,13 @@ public class FlightService {
         FlightEntity updated = flightMapper.toEntity(flightDto);
         updated.setId(existing.getId());
         return flightMapper.toDto(flightRepository.save(updated));
+    }
+
+
+    @Deprecated
+    @Transactional
+    public FlightDto updateFlightOrThrow(Long id, FlightDto flightDto) {
+        return updateFlightByIdOrThrow(id, flightDto);
     }
 
     @Transactional

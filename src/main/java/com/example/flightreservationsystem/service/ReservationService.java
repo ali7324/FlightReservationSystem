@@ -1,5 +1,7 @@
 package com.example.flightreservationsystem.service;
 
+import com.example.flightreservationsystem.dto.PaymentDto;
+import com.example.flightreservationsystem.dto.ReservationDto;
 import com.example.flightreservationsystem.entity.FlightEntity;
 import com.example.flightreservationsystem.entity.PassengerEntity;
 import com.example.flightreservationsystem.entity.ReservationEntity;
@@ -8,7 +10,6 @@ import com.example.flightreservationsystem.exception.ResourceNotFoundException;
 import com.example.flightreservationsystem.mapper.FlightMapper;
 import com.example.flightreservationsystem.mapper.PassengerMapper;
 import com.example.flightreservationsystem.mapper.ReservationMapper;
-import com.example.flightreservationsystem.dto.ReservationDto;
 import com.example.flightreservationsystem.repository.FlightRepository;
 import com.example.flightreservationsystem.repository.PassengerRepository;
 import com.example.flightreservationsystem.repository.ReservationRepository;
@@ -32,6 +33,8 @@ public class ReservationService {
     private final PassengerMapper passengerMapper;
     private final FlightMapper flightMapper;
     private final MailService mailService;
+    private final PaymentService paymentService;
+
 
     public List<ReservationDto> getAllReservations() {
         log.info("Fetching all reservations");
@@ -49,11 +52,10 @@ public class ReservationService {
 
     @Transactional
     public ReservationDto createReservation(ReservationDto dto) {
-        log.info("Creating reservation, passengerId={}, flightId={}", dto.getPassengerId(), dto.getFlightId());
+        log.info("Creating reservation (legacy), passengerId={}, flightId={}", dto.getPassengerId(), dto.getFlightId());
 
         PassengerEntity passenger = passengerRepository.findById(dto.getPassengerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Passenger not found with ID: " + dto.getPassengerId()));
-
         FlightEntity flight = flightRepository.findById(dto.getFlightId())
                 .orElseThrow(() -> new ResourceNotFoundException("Flight not found with ID: " + dto.getFlightId()));
 
@@ -68,19 +70,43 @@ public class ReservationService {
         if (entity.getStatus() == null) entity.setStatus(ReservationStatus.PENDING);
 
         ReservationEntity saved = reservationRepository.save(entity);
-
-
-        try {
-            mailService.sendReservationConfirmationMail(
-                    passengerMapper.toDto(passenger),
-                    flightMapper.toDto(flight)
-            );
-        } catch (Exception e) {
-            log.warn("Notification email failed on reservation create: {}", e.getMessage());
-        }
-
         return reservationMapper.toDto(saved);
     }
+
+    @Transactional
+    public ReservationDto createReservationWithPayment(ReservationDto reservationDto, PaymentDto paymentDto) {
+        log.info("Creating reservation WITH payment, passengerId={}, flightId={}",
+                reservationDto.getPassengerId(), reservationDto.getFlightId());
+
+        PassengerEntity passenger = passengerRepository.findById(reservationDto.getPassengerId())
+                .orElseThrow(() -> new ResourceNotFoundException("Passenger not found with ID: " + reservationDto.getPassengerId()));
+        FlightEntity flight = flightRepository.findById(reservationDto.getFlightId())
+                .orElseThrow(() -> new ResourceNotFoundException("Flight not found with ID: " + reservationDto.getFlightId()));
+
+        if (flight.getDepartureTime() != null && flight.getDepartureTime().isBefore(LocalDateTime.now())) {
+            throw new IllegalStateException("Cannot create reservation for past flights");
+        }
+
+        ReservationEntity entity = reservationMapper.toEntity(reservationDto);
+        entity.setPassenger(passenger);
+        entity.setFlight(flight);
+        entity.setReservationDate(LocalDateTime.now());
+        if (entity.getStatus() == null) entity.setStatus(ReservationStatus.PENDING);
+
+        ReservationEntity saved = reservationRepository.save(entity);
+
+        if (paymentDto == null) {
+            throw new IllegalArgumentException("Payment information is required");
+        }
+        paymentDto.setReservationId(saved.getId());
+        paymentService.processPayment(paymentDto);
+
+        ReservationEntity refreshed = reservationRepository.findById(saved.getId())
+                .orElseThrow(() -> new ResourceNotFoundException("Reservation not found after payment: " + saved.getId()));
+
+        return reservationMapper.toDto(refreshed);
+    }
+
 
     @Transactional
     public ReservationDto updateReservationOrThrow(Long id, ReservationDto dto) {
@@ -91,7 +117,6 @@ public class ReservationService {
 
         PassengerEntity passenger = passengerRepository.findById(dto.getPassengerId())
                 .orElseThrow(() -> new ResourceNotFoundException("Passenger not found with ID: " + dto.getPassengerId()));
-
         FlightEntity flight = flightRepository.findById(dto.getFlightId())
                 .orElseThrow(() -> new ResourceNotFoundException("Flight not found with ID: " + dto.getFlightId()));
 
@@ -103,7 +128,6 @@ public class ReservationService {
         updated.setId(existing.getId());
         updated.setPassenger(passenger);
         updated.setFlight(flight);
-
         updated.setReservationDate(existing.getReservationDate());
 
         return reservationMapper.toDto(reservationRepository.save(updated));
@@ -133,15 +157,25 @@ public class ReservationService {
                 .orElseThrow(() -> new ResourceNotFoundException("Reservation not found with ID: " + id));
 
         if (reservation.getStatus() == ReservationStatus.CANCELLED) {
-            return reservationMapper.toDto(reservation); // artıq cancel olunub
+            return reservationMapper.toDto(reservation);
         }
+
         if (reservation.getStatus() == ReservationStatus.CONFIRMED ||
                 reservation.getStatus() == ReservationStatus.PENDING) {
+
             reservation.setStatus(ReservationStatus.CANCELLED);
-        } else {
-            throw new IllegalStateException("Cannot cancel reservation in status: " + reservation.getStatus());
+            ReservationEntity saved = reservationRepository.save(reservation);
+
+            try {
+                paymentService.refundPayment(id);
+            } catch (Exception e) {
+                log.warn("Refund failed for reservation {}: {}", id, e.getMessage());
+            }
+
+            return reservationMapper.toDto(saved);
         }
-        return reservationMapper.toDto(reservationRepository.save(reservation));
+
+        throw new IllegalStateException("Cannot cancel reservation in status: " + reservation.getStatus());
     }
 
     public List<ReservationDto> getReservationHistory() {
@@ -155,7 +189,6 @@ public class ReservationService {
 
     public void sendUpcomingFlightReminders() {
         log.info("Running daily reminder job for upcoming confirmed flights...");
-
         List<ReservationEntity> reservations = reservationRepository.findTomorrowConfirmedReservations();
         log.info("Found {} confirmed reservations for tomorrow", reservations.size());
 
