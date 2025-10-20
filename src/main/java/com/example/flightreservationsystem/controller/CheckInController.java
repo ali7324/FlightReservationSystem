@@ -1,4 +1,7 @@
-// com.example.flightreservationsystem.controller.CheckInController
+// REST qatında 2 endpoint:
+// 1) /eligibility  -> yalnız yoxlama (front "Check" düyməsi üçün)
+// 2) /{reservationId} -> real check-in (front "Check-in" düyməsi üçün)
+
 package com.example.flightreservationsystem.controller;
 
 import com.example.flightreservationsystem.dto.ApiResponse;
@@ -16,17 +19,19 @@ public class CheckInController {
 
     private final CheckInService checkInService;
 
-    // user və admin gore bilsin
+    // USER və ADMIN hər ikisi baxa bilər (SecurityConfig-də qorunur)
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @GetMapping("/eligibility")
     public ApiResponse<CheckInEligibilityDto> eligibility(@RequestParam Long reservationId) {
+        //GET /api/v1/check-in/eligibility?reservationId=10
         return ApiResponse.ok("Eligibility calculated", checkInService.checkEligibility(reservationId));
     }
 
-    // user və admin nese elesin
+    // USER və ADMIN real check-in edə bilər
     @PreAuthorize("hasAnyRole('ADMIN','USER')")
     @PostMapping("/{reservationId}")
     public ApiResponse<BoardingPassDto> checkIn(@PathVariable Long reservationId) {
+        //  POST /api/v1/check-in/15
         return ApiResponse.ok("Checked in successfully", checkInService.checkIn(reservationId));
     }
 }
